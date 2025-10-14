@@ -15,7 +15,7 @@
     }
 
     h1 {
-      background: #393c3f;
+      background: #292b2e;
       color: white;
       margin: 0;
       padding: 20px;
@@ -33,7 +33,7 @@
       margin: 0 5px;
       border: none;
       background: #bdc3c7;
-      color: #393c3f;
+      color: #292b2e;
       cursor: pointer;
       border-radius: 5px 5px 0 0;
       font-weight: bold;
@@ -41,7 +41,7 @@
     }
 
     .tab-button.active {
-      background: #393c3f;
+      background: #292b2e;
       color: white;
     }
 
@@ -65,7 +65,7 @@
     }
 
     #opcoes {
-      width: 220px;
+      width: 250px;
       text-align: left;
       background: #ecf0f1;
       padding: 15px;
@@ -77,6 +77,8 @@
       display: flex;
       flex-direction: column;
       gap: 5px;
+      font-size: 13px;
+      line-height: 1.3;
     }
 
     label {
@@ -88,6 +90,22 @@
 
     input[type="checkbox"] {
       transform: scale(1.2);
+    }
+
+    #user-form input[type="text"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+
+    #user-form button {
+      margin-top: 5px;
+      width: 100%;
+      padding: 5px;
+      background: #2c3e50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -132,30 +150,43 @@
       }
     };
 
-    function desenhar(aba, selecionadas) {
-      const layout = {
-        title: `${aba} Metrics`,
-        margin: { t: 50 },
-        paper_bgcolor: 'white',
-        plot_bgcolor: 'white'
-      };
-      const data = selecionadas.map(nome => dados[aba].curvas[nome]);
-      Plotly.newPlot('grafico', data, layout, { responsive: true });
+    // curvas adicionadas pelo usuário
+    const userCurves = { DTI: {}, DKI: {}, NODDI: {} };
+
+    function desenhar(aba) {
+      const selecionadas = [...document.querySelectorAll('#opcoes input:checked')].map(el => el.value);
+      const todasCurvas = { ...dados[aba].curvas, ...userCurves[aba] };
+      const data = selecionadas.map(nome => todasCurvas[nome]);
+      Plotly.newPlot('grafico', data, { title: `${aba} Metrics`, margin: { t: 50 }, paper_bgcolor: 'white', plot_bgcolor: 'white' }, { responsive: true });
     }
 
     function criarCheckboxes(aba) {
       const container = document.getElementById('opcoes');
       container.innerHTML = `<h3>${aba} Metrics</h3>`;
+
+      // Formulário para adicionar curva do usuário
+      const form = document.createElement('div');
+      form.id = 'user-form';
+      form.innerHTML = `
+        <h4>Adicionar sua curva</h4>
+        X (vírgula): <input type="text" id="user-x" placeholder="1,2,3,4"><br>
+        Y (vírgula): <input type="text" id="user-y" placeholder="10,15,13,17"><br>
+        Nome: <input type="text" id="user-name" placeholder="Minha Curva"><br>
+        <button onclick="adicionarCurva('${aba}')">Adicionar curva</button>
+      `;
+      container.appendChild(form);
+
       const grupo = document.createElement('div');
       grupo.className = 'checkbox-group';
 
-      Object.keys(dados[aba].curvas).forEach(nome => {
+      const todasCurvas = { ...dados[aba].curvas, ...userCurves[aba] };
+      Object.keys(todasCurvas).forEach(nome => {
         const label = document.createElement('label');
         const input = document.createElement('input');
         input.type = 'checkbox';
         input.value = nome;
         input.checked = true;
-        input.addEventListener('change', () => atualizarGrafico(aba));
+        input.addEventListener('change', () => desenhar(aba));
         label.appendChild(input);
         label.append(nome);
         grupo.appendChild(label);
@@ -164,21 +195,33 @@
       container.appendChild(grupo);
     }
 
-    function atualizarGrafico(aba) {
-      const selecionadas = [...document.querySelectorAll('#opcoes input:checked')].map(el => el.value);
-      desenhar(aba, selecionadas);
+    function adicionarCurva(aba) {
+      const xStr = document.getElementById('user-x').value;
+      const yStr = document.getElementById('user-y').value;
+      const nome = document.getElementById('user-name').value || 'Minha Curva';
+
+      if (!xStr || !yStr) { alert('Preencha X e Y!'); return; }
+
+      const x = xStr.split(',').map(Number);
+      const y = yStr.split(',').map(Number);
+
+      if (x.length !== y.length) { alert('X e Y devem ter o mesmo tamanho!'); return; }
+
+      userCurves[aba][nome] = { x, y, type: 'scatter', name: nome };
+      criarCheckboxes(aba);
+      desenhar(aba);
     }
 
     function mostrarAba(aba, event) {
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
       criarCheckboxes(aba);
-      atualizarGrafico(aba);
+      desenhar(aba);
     }
 
     // inicializa na aba DTI
     criarCheckboxes('DTI');
-    atualizarGrafico('DTI');
+    desenhar('DTI');
   </script>
 </body>
 </html>
