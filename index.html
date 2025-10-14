@@ -14,8 +14,10 @@ h1 { background:#2c3e50;color:white;margin:0;padding:20px; }
 .tab-button.active { background:#2c3e50; color:white; }
 
 .content { display:flex; justify-content:space-between; gap:20px; width:90%; max-width:1000px; margin:20px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); align-items:flex-start; }
-#grafico { flex:1; height:500px; }
-#opcoes { width:250px; text-align:left; background:#ecf0f1; padding:15px; border-radius:8px; box-shadow: inset 0 0 3px rgba(0,0,0,0.1); font-size:13px; line-height:1.3; }
+#grafico { flex:1; height:700px; }
+#opcoes { width:280px; text-align:left; background:#ecf0f1; padding:15px; border-radius:8px; box-shadow: inset 0 0 3px rgba(0,0,0,0.1); font-size:13px; line-height:1.3; }
+#rois { height:250px; }  /* Mostra mais linhas no seletor de ROIs */
+#metricas { height:80px; }
 
 #opcoes label { display:block; margin-bottom:5px; cursor:pointer; }
 #opcoes input, #opcoes select { width:100%; margin-bottom:8px; }
@@ -37,8 +39,80 @@ h1 { background:#2c3e50;color:white;margin:0;padding:20px; }
 </div>
 
 <script>
-// dados de exemplo
-const ROIs = ['ROI1','ROI2','ROI3','ROI4','ROI5','ROI6','ROI7','ROI8','ROI9','ROI10'];
+const ROIs = [
+  'AF-L: Arcuate fascicle (L)',
+  'AF-R: Arcuate fascicle (R)',
+  'ATR-L: Anterior Thalamic Radiation (L)',
+  'ATR-R: Anterior Thalamic Radiation (R)',
+  'CA: Commissure Anterior',
+  'CC-1: Rostrum',
+  'CC-2: Genu',
+  'CC-3: Rostral Body (PreMotor)',
+  'CC-4: Anterior midbody (Primary Motor)',
+  'CC-5: Posterior midbody (Primary Somatosensory)',
+  'CC-6: Isthmus',
+  'CC-7: Splenium',
+  'CG-L: Cingulum (L)',
+  'CG-R: Cingulum (R)',
+  'CST-L: Corticospinal tract (L)',
+  'CST-R: Corticospinal tract (R)',
+  'MLF-L: Middle longitudinal fascicle (L)',
+  'MLF-R: Middle longitudinal fascicle (R)',
+  'FPT-L: Fronto-pontine tract (L)',
+  'FPT-R: Fronto-pontine tract (R)',
+  'FX-L: Fornix (L)',
+  'FX-R: Fornix (R)',
+  'ICP-L: Inferior cerebellar peduncle (L)',
+  'ICP-R: Inferior cerebellar peduncle (R)',
+  'IFO-L: Inferior occipito-frontal fascicle (L)',
+  'IFO-R: Inferior occipito-frontal fascicle (R)',
+  'ILF-L: Inferior longitudinal fascicle (L)',
+  'ILF-R: Inferior longitudinal fascicle (R)',
+  'MCP: Middle cerebellar peduncle',
+  'OR-L: Optic radiation (L)',
+  'OR-R: Optic radiation (R)',
+  'POPT-L: Parieto‐occipital pontine (L)',
+  'POPT-R: Parieto‐occipital pontine (R)',
+  'SCP-L: Superior cerebellar peduncle (L)',
+  'SCP-R: Superior cerebellar peduncle (R)',
+  'SLF-I-L: Superior longitudinal fascicle I (L)',
+  'SLF-I-R: Superior longitudinal fascicle I (R)',
+  'SLF-II-L: Superior longitudinal fascicle II (L)',
+  'SLF-II-R: Superior longitudinal fascicle II (R)',
+  'SLF-III-L: Superior longitudinal fascicle III (L)',
+  'SLF-III-R: Superior longitudinal fascicle III (R)',
+  'STR-L: Superior Thalamic Radiation (L)',
+  'STR-R: Superior Thalamic Radiation (R)',
+  'UF-L: Uncinate fascicle (L)',
+  'UF-R: Uncinate fascicle (R)',
+  'CC: Corpus Callosum',
+  'T_PREF-L: Thalamo-prefrontal (L)',
+  'T_PREF-R: Thalamo-prefrontal (R)',
+  'T_PREM-L: Thalamo-premotor (L)',
+  'T_PREM-R:Thalamo-premotor (R)',
+  'T_PREC-L: Thalamo-precentral (L)',
+  'T_PREC-R: Thalamo-precentral (R)',
+  'T_POSTC-L: Thalamo-postcentral (L)',
+  'T_POSTC-R: Thalamo-postcentral (R)',
+  'T-PAR-L: Thalamo-parietal (L)',
+  'T-PAR-R: Thalamo-parietal (R)',
+  'T-OCC-L: Thalamo-occipital (L)',
+  'T-OCC-R: Thalamo-occipital (R)',
+  'ST-FO-L: Striato-fronto-orbital (L)',
+  'ST-FO-R: Striato-fronto-orbital (R)',
+  'ST-PREF-L: Striato-prefrontal (L)',
+  'ST-PREF-R: Striato-prefrontal (R)',
+  'ST-PREM-L: Striato-premotor (L)',
+  'ST-PREM-R: Striato-premotor (R)',
+  'ST-PREC-L: Striato-precentral (L)',
+  'ST-PREC-R: Striato-precentral (R)',
+  'ST-POSTC-L: Striato-postcentral (L)',
+  'ST-POSTC-R: Striato-postcentral (R)',
+  'ST-PAR-L: Striato-parietal (L)',
+  'ST-PAR-R:Striato-parietal (R)',
+  'ST-OCC-L:Striato-occipital (L)',
+  'ST-OCC-R:Striato-occipital (R)'
+];
 const dados = {
   DTI: { 'AD': {}, 'MD': {}, 'FA': {} },
   DKI: { 'AK': {}, 'MK': {}, 'RK': {} },
@@ -94,7 +168,7 @@ function criarPainel(aba){
     selMetricas.appendChild(opt);
   }
   selMetricas.addEventListener('change', ()=>desenhar(aba));
-  container.appendChild(document.createTextNode('Métricas:'));
+  container.appendChild(document.createTextNode('Metrics:'));
   container.appendChild(selMetricas);
 
   // dropdown múltiplo de ROIs
@@ -109,11 +183,11 @@ function criarPainel(aba){
   const form = document.createElement('div');
   form.id='user-form';
   form.innerHTML = `
-    <h4>Adicionar sua curva</h4>
-    X (vírgula): <input type="text" id="user-x" placeholder="1,2,3,4"><br>
-    Y (vírgula): <input type="text" id="user-y" placeholder="10,15,13,17"><br>
+    <h4>Add your plot</h4>
+    X (comma): <input type="text" id="user-x" placeholder="1,2,3,4"><br>
+    Y (comma): <input type="text" id="user-y" placeholder="10,15,13,17"><br>
     Nome: <input type="text" id="user-name" placeholder="Minha Curva"><br>
-    <button onclick="adicionarCurva('${aba}')">Adicionar curva</button>
+    <button onclick="adicionarCurva('${aba}')">Add curve</button>
   `;
   container.appendChild(form);
 }
@@ -122,12 +196,12 @@ function criarPainel(aba){
 function adicionarCurva(aba){
   const xStr=document.getElementById('user-x').value;
   const yStr=document.getElementById('user-y').value;
-  const nome=document.getElementById('user-name').value || 'Minha Curva';
+  const nome=document.getElementById('user-name').value || 'User Plot';
 
-  if(!xStr || !yStr){alert('Preencha X e Y!'); return;}
+  if(!xStr || !yStr){alert('Add your X and Y data!'); return;}
   const x=xStr.split(',').map(Number);
   const y=yStr.split(',').map(Number);
-  if(x.length!==y.length){alert('X e Y devem ter o mesmo tamanho!'); return;}
+  if(x.length!==y.length){alert('X and Y arrays must have the same size!'); return;}
 
   const cor=userColors[colorIndex%userColors.length]; colorIndex+=1;
   userCurves[aba][nome]={ x, y, type:'scatter', name:nome, mode:'lines+markers', line:{dash:'dot', width:2}, marker:{size:8,symbol:'square', color:cor} };
