@@ -78,9 +78,9 @@
   <h1>7TBRP Diffusion MRI Normative Charts</h1>
 
   <div class="tab-container">
-    <button class="tab-button active" onclick="mostrarAba('A', event)">Gráfico A</button>
-    <button class="tab-button" onclick="mostrarAba('B', event)">Gráfico B</button>
-    <button class="tab-button" onclick="mostrarAba('C', event)">Gráfico C</button>
+    <button class="tab-button active" onclick="mostrarAba('DTI', event)">DTI</button>
+    <button class="tab-button" onclick="mostrarAba('DKI', event)">DKI</button>
+    <button class="tab-button" onclick="mostrarAba('NODDI', event)">NODDI</button>
   </div>
 
   <div class="content">
@@ -90,23 +90,27 @@
 
   <script>
     const dados = {
-      A: {
+      DTI: {
         curvas: {
-          'Série 1': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'Série 1' },
-          'Série 2': { x: [1, 2, 3, 4], y: [16, 5, 11, 9], type: 'scatter', name: 'Série 2' },
-          'Série 3': { x: [1, 2, 3, 4], y: [12, 9, 7, 10], type: 'scatter', name: 'Série 3' }
+          'Axial Diffusivity - AD': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'DTI-AD' },
+          'Mean Diffusivity - MD': { x: [1, 2, 3, 4], y: [16, 5, 11, 9], type: 'scatter', name: 'DTI-MD' },
+          'Radial Diffusivity - RD': { x: [1, 2, 3, 4], y: [16, 5, 11, 9], type: 'scatter', name: 'DTI-RD' },
+          'Fractional Anisotropy - FA': { x: [1, 2, 3, 4], y: [12, 9, 7, 10], type: 'scatter', name: 'DTI-FA' }
         }
       },
-      B: {
+      DKI: {
         curvas: {
-          'Grupo 1': { x: ['A', 'B', 'C', 'D'], y: [20, 14, 23, 25], type: 'bar', name: 'Grupo 1' },
-          'Grupo 2': { x: ['A', 'B', 'C', 'D'], y: [12, 18, 9, 14], type: 'bar', name: 'Grupo 2' }
+          'Axial Kurtosis - AK': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'DKI-AK' },
+          'Mean Kurtosis - MK': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'DKI-MK' },
+          'Radial Kurtosis - RK': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'DKI-RK' },
         }
       },
-      C: {
+      NODDI: {
         curvas: {
-          'Linguagens': { labels: ['Python', 'R', 'Matlab', 'C++'], values: [50, 20, 15, 15], type: 'pie', name: 'Linguagens' },
-          'Frameworks': { labels: ['Dash', 'Streamlit', 'Bokeh'], values: [60, 25, 15], type: 'pie', name: 'Frameworks' }
+          'Orientation Dispersion Index - ODI': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'NODDI-ODI' },
+          'Neurite Density Index - NDI': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'NODDI-NDI' },
+          'Free Water Fraction - FWF': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'NODDI-FWF' },
+
         }
       }
     };
