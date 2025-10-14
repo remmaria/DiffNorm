@@ -6,88 +6,24 @@
 <title>7TBRP Diffusion MRI Normative Charts</title>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <style>
-  body {
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    background-color: #fafafa;
-    color: #333;
-  }
+  body { font-family: Arial, sans-serif; margin:0; background:#f5f6fa; color:#333; }
+  header { background:#2c3e50; color:white; padding:20px; text-align:center; font-size:22px; font-weight:bold; }
 
-  header {
-    background: #004d7a;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    font-size: 22px;
-    font-weight: 600;
-  }
+  .container { display:flex; flex-wrap:wrap; gap:20px; padding:20px; justify-content:center; }
+  .panel { background:white; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); min-width:220px; max-height:600px; overflow:auto; }
+  .panel label { display:block; margin-bottom:3px; font-size:13px; }
+  select { width:100%; }
+  
+  .graph-container { flex:1 1 600px; min-width:400px; height:600px; }
 
-  .container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 20px;
-  }
+  .custom-curve { background:white; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-top:10px; min-width:220px; }
+  .custom-curve input, .custom-curve button { width:100%; margin:5px 0; padding:6px; border-radius:5px; border:1px solid #ccc; }
+  .custom-curve button { background:#2c3e50; color:white; cursor:pointer; font-weight:bold; }
+  .custom-curve button:hover { background:#1a2a38; }
 
-  .metrics, .rois {
-    flex: 1;
-    min-width: 180px;
-    max-height: 400px;
-    overflow-y: auto;
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    font-size: 13px;
-  }
-
-  .metrics label, .rois label {
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .graph-container {
-    flex: 3;
-    min-width: 400px;
-    height: 600px;
-  }
-
-  .custom-curve {
-    width: 100%;
-    margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    background: #fff;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    font-size: 13px;
-  }
-
-  .custom-curve div {
-    flex: 1;
-    min-width: 180px;
-  }
-
-  input, button {
-    width: 100%;
-    margin: 5px 0;
-    padding: 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
-
-  button {
-    background: #004d7a;
-    color: white;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  button:hover {
-    background: #006699;
+  @media(max-width:1000px) {
+    .container { flex-direction:column; align-items:center; }
+    .graph-container { width:95%; }
   }
 </style>
 </head>
@@ -95,9 +31,10 @@
 <header>7TBRP Diffusion MRI Normative Charts</header>
 
 <div class="container">
-  <div class="metrics">
-    <label for="metricas"><strong>Diffusion Metrics:</strong></label>
-    <select id="metricas" multiple size="8">
+  <!-- Painel Métricas -->
+  <div class="panel">
+    <strong>Diffusion Metrics:</strong><br>
+    <select id="metricas" multiple size="10">
       <option value="DTI-Fractional Anisotropy (FA)" selected>DTI-Fractional Anisotropy (FA)</option>
       <option value="DTI-Axial Diffusivity (AD)">DTI-Axial Diffusivity (AD)</option>
       <option value="DTI-Mean Diffusivity (MD)">DTI-Mean Diffusivity (MD)</option>
@@ -111,107 +48,88 @@
     </select>
   </div>
 
-  <div class="rois">
+  <!-- Painel ROIs -->
+  <div class="panel">
     <strong>ROIs:</strong><br>
-    <label><input type="checkbox" value="Corpus Callosum" checked> Corpus Callosum</label>
-    <label><input type="checkbox" value="Corticospinal Tract"> Corticospinal Tract</label>
-    <label><input type="checkbox" value="Cingulum"> Cingulum</label>
-    <label><input type="checkbox" value="Thalamus"> Thalamus</label>
-    <label><input type="checkbox" value="Internal Capsule"> Internal Capsule</label>
-    <label><input type="checkbox" value="Optic Radiation"> Optic Radiation</label>
-    <label><input type="checkbox" value="Superior Longitudinal Fasciculus"> SLF</label>
-    <label><input type="checkbox" value="Inferior Fronto-Occipital Fasciculus"> IFOF</label>
-    <label><input type="checkbox" value="Arcuate Fasciculus"> Arcuate</label>
-    <label><input type="checkbox" value="Fornix"> Fornix</label>
-    <label><input type="checkbox" value="Uncinate Fasciculus"> Uncinate</label>
-    <label><input type="checkbox" value="Cerebellar Peduncle"> Cerebellar Peduncle</label>
+    <select id="rois" multiple size="20">
+      <option value="AF-L: Arcuate fascicle (L)">AF-L: Arcuate fascicle (L)</option>
+      <option value="AF-R: Arcuate fascicle (R)">AF-R: Arcuate fascicle (R)</option>
+      <option value="ATR-L: Anterior Thalamic Radiation (L)">ATR-L: Anterior Thalamic Radiation (L)</option>
+      <option value="ATR-R: Anterior Thalamic Radiation (R)">ATR-R: Anterior Thalamic Radiation (R)</option>
+      <option value="CA: Commissure Anterior">CA: Commissure Anterior</option>
+      <option value="CC-1: Rostrum">CC-1: Rostrum</option>
+      <option value="CC-2: Genu">CC-2: Genu</option>
+      <option value="CC-3: Rostral Body (PreMotor)">CC-3: Rostral Body (PreMotor)</option>
+      <option value="CC-4: Anterior midbody (Primary Motor)">CC-4: Anterior midbody (Primary Motor)</option>
+      <option value="CC-5: Posterior midbody (Primary Somatosensory)">CC-5: Posterior midbody (Primary Somatosensory)</option>
+      <option value="CC-6: Isthmus">CC-6: Isthmus</option>
+      <option value="CC-7: Splenium">CC-7: Splenium</option>
+      <option value="CG-L: Cingulum (L)">CG-L: Cingulum (L)</option>
+      <option value="CG-R: Cingulum (R)">CG-R: Cingulum (R)</option>
+      <option value="CST-L: Corticospinal tract (L)">CST-L: Corticospinal tract (L)</option>
+      <option value="CST-R: Corticospinal tract (R)">CST-R: Corticospinal tract (R)</option>
+      <option value="MLF-L: Middle longitudinal fascicle (L)">MLF-L: Middle longitudinal fascicle (L)</option>
+      <option value="MLF-R: Middle longitudinal fascicle (R)">MLF-R: Middle longitudinal fascicle (R)</option>
+      <option value="FPT-L: Fronto-pontine tract (L)">FPT-L: Fronto-pontine tract (L)</option>
+      <option value="FPT-R: Fronto-pontine tract (R)">FPT-R: Fronto-pontine tract (R)</option>
+      <option value="FX-L: Fornix (L)">FX-L: Fornix (L)</option>
+      <option value="FX-R: Fornix (R)">FX-R: Fornix (R)</option>
+      <option value="ICP-L: Inferior cerebellar peduncle (L)">ICP-L: Inferior cerebellar peduncle (L)</option>
+      <option value="ICP-R: Inferior cerebellar peduncle (R)">ICP-R: Inferior cerebellar peduncle (R)</option>
+      <!-- continue com todas as demais ROIs completas -->
+    </select>
   </div>
 
+  <!-- Gráfico -->
   <div class="graph-container" id="graph"></div>
+</div>
 
+<!-- Curva personalizada -->
+<div class="container">
   <div class="custom-curve">
-    <div>
-      <label>X (comma separated)</label>
-      <input type="text" id="xvalues" placeholder="ex: 0,10,20,30">
-    </div>
-    <div>
-      <label>Y (comma separated)</label>
-      <input type="text" id="yvalues" placeholder="ex: 0.5,0.6,0.7,0.8">
-    </div>
-    <div>
-      <label>Name</label>
-      <input type="text" id="curvename" placeholder="Minha Curva">
-      <button onclick="addCustomCurve()">Adicionar Curva</button>
-    </div>
+    <h4>Adicionar curva personalizada</h4>
+    <label>X (valores separados por vírgula):</label>
+    <input type="text" id="xvalues" placeholder="ex: 0,10,20,30">
+    <label>Y (valores separados por vírgula):</label>
+    <input type="text" id="yvalues" placeholder="ex: 0.5,0.6,0.7,0.8">
+    <label>Nome da curva:</label>
+    <input type="text" id="curveName" placeholder="Minha Curva">
+    <button onclick="addCustomCurve()">Adicionar curva</button>
   </div>
 </div>
 
 <script>
-const userCurves = [];
-const userColors = ['red','green','blue','orange','purple','brown','pink'];
-let colorIndex = 0;
-
-function getSelectedValues(containerClass) {
-  return Array.from(document.querySelectorAll(`.${containerClass} input:checked`)).map(el => el.value);
+function getSelected(id) {
+  return Array.from(document.getElementById(id).selectedOptions).map(o=>o.value);
 }
 
 function plotGraph() {
-  const metrics = getSelectedValues('metrics');
-  const rois = getSelectedValues('rois');
-
+  const metrics = getSelected('metricas');
+  const rois = getSelected('rois');
   const traces = [];
   const x = [0,10,20,30,40,50];
 
-  for (let m of metrics) {
-    for (let r of rois) {
-      const y = x.map(() => Math.random()*0.2 + 0.4); // dados fictícios
-      traces.push({ x, y, mode:'lines', name:`${r} - ${m}`, line:{width:2} });
-    }
-  }
-
-  // adicionar curvas do usuário
-  userCurves.forEach(c => traces.push(c));
-
-  Plotly.newPlot('graph', traces, {
-    margin:{t:40,l:50,r:10,b:50},
-    height:600,
-    xaxis:{title:'Idade'},
-    yaxis:{title:'Valor da Métrica'},
-    showlegend:true
+  metrics.forEach(m=>{
+    rois.forEach(r=>{
+      const y = x.map(()=>Math.random()*0.2 + 0.4); // dados fictícios
+      traces.push({x, y, mode:'lines', name:`${r} - ${m}`, line:{width:2}});
+    });
   });
+
+  Plotly.newPlot('graph', traces, {margin:{t:40,l:50,r:10,b:50}, height:600, xaxis:{title:'Idade'}, yaxis:{title:'Valor da Métrica'}, showlegend:true});
 }
 
 function addCustomCurve() {
-  const xInput = document.getElementById('xvalues').value;
-  const yInput = document.getElementById('yvalues').value;
-  const name = document.getElementById('curvename').value || 'User Curve';
-
-  const x = xInput.split(',').map(Number);
-  const y = yInput.split(',').map(Number);
-
-  if(x.length !== y.length || x.some(isNaN) || y.some(isNaN)) {
-    alert('Valores inválidos! Verifique X e Y.');
-    return;
-  }
-
-  const color = userColors[colorIndex % userColors.length];
-  colorIndex += 1;
-
-  userCurves.push({
-    x, y, mode:'lines+markers', name,
-    line:{dash:'dot', width:2, color},
-    marker:{symbol:'square', size:8, color}
-  });
-
-  plotGraph();
+  const x = document.getElementById('xvalues').value.split(',').map(Number);
+  const y = document.getElementById('yvalues').value.split(',').map(Number);
+  const name = document.getElementById('curveName').value || 'Curva personalizada';
+  if(x.length !== y.length || x.some(isNaN) || y.some(isNaN)){ alert('Valores inválidos'); return; }
+  Plotly.addTraces('graph',{x,y,mode:'lines+markers',name:name,line:{color:'black',dash:'dot',width:2},marker:{symbol:'square',size:8,color:'black'}});
 }
 
-// atualizar gráfico quando mudar checkboxes
-document.querySelectorAll('.metrics input, .rois input').forEach(el=>{
-  el.addEventListener('change', plotGraph);
-});
+document.getElementById('metricas').addEventListener('change', plotGraph);
+document.getElementById('rois').addEventListener('change', plotGraph);
 
-// plot inicial
 plotGraph();
 </script>
 </body>
