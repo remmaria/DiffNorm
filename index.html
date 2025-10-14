@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Gráfico Interativo</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 40px;
+      background: #f8f9fa;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #grafico {
+      margin-top: 30px;
+      width: 80%;
+      max-width: 700px;
+      height: 450px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Exemplo de Página com Plotly e Botões</h2>
+
+  <button onclick="atualiza('A')">Mostrar dados A</button>
+  <button onclick="atualiza('B')">Mostrar dados B</button>
+
+  <div id="grafico"></div>
+
+  <script>
+    const dadosA = { x: [1,2,3,4], y: [2,4,6,8], name: 'A', type: 'scatter' };
+    const dadosB = { x: [1,2,3,4], y: [3,1,7,5], name: 'B', type: 'scatter' };
+
+    function atualiza(tipo) {
+      const data = tipo === 'A' ? [dadosA] : [dadosB];
+      Plotly.newPlot('grafico', data, { title: `Gráfico ${tipo}` });
+    }
+
+    atualiza('A'); // inicializa com A
+  </script>
+
+</body>
+</html>
