@@ -1,58 +1,110 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Gráfico Interativo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Interativo - Plotly</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
+      background: #f5f6fa;
+      margin: 0;
+      padding: 0;
       text-align: center;
-      margin: 40px;
-      background: #f8f9fa;
     }
-    button {
-      margin: 5px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      background: #007bff;
+
+    h1 {
+      background: #2c3e50;
       color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .tab-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .tab-button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: none;
+      background: #bdc3c7;
+      color: #2c3e50;
       cursor: pointer;
+      border-radius: 5px 5px 0 0;
+      font-weight: bold;
+      transition: background 0.2s;
     }
-    button:hover {
-      background: #0056b3;
+
+    .tab-button.active {
+      background: #2c3e50;
+      color: white;
     }
+
+    .content {
+      background: white;
+      border-radius: 0 0 10px 10px;
+      width: 90%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
     #grafico {
-      margin-top: 30px;
-      width: 80%;
-      max-width: 700px;
+      width: 100%;
       height: 450px;
-      margin-left: auto;
-      margin-right: auto;
     }
   </style>
 </head>
+
 <body>
+  <h1>Painel Interativo com Plotly</h1>
 
-  <h2>Exemplo de Página com Plotly e Botões</h2>
+  <div class="tab-container">
+    <button class="tab-button active" onclick="mostrarAba('A')">Gráfico A</button>
+    <button class="tab-button" onclick="mostrarAba('B')">Gráfico B</button>
+    <button class="tab-button" onclick="mostrarAba('C')">Gráfico C</button>
+  </div>
 
-  <button onclick="atualiza('A')">Mostrar dados A</button>
-  <button onclick="atualiza('B')">Mostrar dados B</button>
-
-  <div id="grafico"></div>
+  <div class="content">
+    <div id="grafico"></div>
+  </div>
 
   <script>
-    const dadosA = { x: [1,2,3,4], y: [2,4,6,8], name: 'A', type: 'scatter' };
-    const dadosB = { x: [1,2,3,4], y: [3,1,7,5], name: 'B', type: 'scatter' };
+    const dados = {
+      A: [
+        { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'Série 1' },
+        { x: [1, 2, 3, 4], y: [16, 5, 11, 9], type: 'scatter', name: 'Série 2' }
+      ],
+      B: [
+        { x: ['A', 'B', 'C', 'D'], y: [20, 14, 23, 25], type: 'bar', marker: { color: '#3498db' } }
+      ],
+      C: [
+        { labels: ['Python', 'R', 'Matlab', 'C++'], values: [50, 20, 15, 15], type: 'pie' }
+      ]
+    };
 
-    function atualiza(tipo) {
-      const data = tipo === 'A' ? [dadosA] : [dadosB];
-      Plotly.newPlot('grafico', data, { title: `Gráfico ${tipo}` });
+    function desenhar(aba) {
+      const layout = {
+        title: `Visualização ${aba}`,
+        margin: { t: 50 },
+        paper_bgcolor: 'white',
+        plot_bgcolor: 'white'
+      };
+      Plotly.newPlot('grafico', dados[aba], layout, { responsive: true });
     }
 
-    atualiza('A'); // inicializa com A
-  </script>
+    function mostrarAba(aba) {
+      document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      desenhar(aba);
+    }
 
+    desenhar('A'); // inicia com a aba A
+  </script>
 </body>
 </html>
