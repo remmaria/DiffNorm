@@ -15,7 +15,7 @@
     }
 
     h1 {
-      background: #2c3e50;
+      background: #393c3f;
       color: white;
       margin: 0;
       padding: 20px;
@@ -33,7 +33,7 @@
       margin: 0 5px;
       border: none;
       background: #bdc3c7;
-      color: #2c3e50;
+      color: #393c3f;
       cursor: pointer;
       border-radius: 5px 5px 0 0;
       font-weight: bold;
@@ -41,7 +41,7 @@
     }
 
     .tab-button.active {
-      background: #2c3e50;
+      background: #393c3f;
       color: white;
     }
 
@@ -49,27 +49,45 @@
       background: white;
       border-radius: 0 0 10px 10px;
       width: 90%;
-      max-width: 850px;
+      max-width: 1000px;
       margin: 0 auto;
       padding: 20px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 30px;
     }
 
     #grafico {
-      width: 100%;
-      height: 450px;
+      flex: 1;
+      height: 500px;
+    }
+
+    #opcoes {
+      width: 220px;
+      text-align: left;
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: inset 0 0 3px rgba(0,0,0,0.1);
     }
 
     .checkbox-group {
-      margin-bottom: 15px;
-      text-align: left;
-      display: inline-block;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
     }
 
     label {
-      display: block;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       cursor: pointer;
-      margin-bottom: 3px;
+    }
+
+    input[type="checkbox"] {
+      transform: scale(1.2);
     }
   </style>
 </head>
@@ -94,36 +112,40 @@
         curvas: {
           'Axial Diffusivity - AD': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'DTI-AD' },
           'Mean Diffusivity - MD': { x: [1, 2, 3, 4], y: [16, 5, 11, 9], type: 'scatter', name: 'DTI-MD' },
-          'Radial Diffusivity - RD': { x: [1, 2, 3, 4], y: [16, 5, 11, 9], type: 'scatter', name: 'DTI-RD' },
+          'Radial Diffusivity - RD': { x: [1, 2, 3, 4], y: [8, 10, 7, 12], type: 'scatter', name: 'DTI-RD' },
           'Fractional Anisotropy - FA': { x: [1, 2, 3, 4], y: [12, 9, 7, 10], type: 'scatter', name: 'DTI-FA' }
         }
       },
       DKI: {
         curvas: {
           'Axial Kurtosis - AK': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'DKI-AK' },
-          'Mean Kurtosis - MK': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'DKI-MK' },
-          'Radial Kurtosis - RK': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'DKI-RK' },
+          'Mean Kurtosis - MK': { x: [1, 2, 3, 4], y: [16, 5, 11, 9], type: 'scatter', name: 'DKI-MK' },
+          'Radial Kurtosis - RK': { x: [1, 2, 3, 4], y: [8, 10, 7, 12], type: 'scatter', name: 'DKI-RK' },
         }
       },
       NODDI: {
         curvas: {
           'Orientation Dispersion Index - ODI': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'NODDI-ODI' },
-          'Neurite Density Index - NDI': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'NODDI-NDI' },
-          'Free Water Fraction - FWF': { x: [1, 2, 3, 4], y: [10, 15, 13, 17], type: 'scatter', name: 'NODDI-FWF' },
-
+          'Neurite Density Index - NDI': { x: [1, 2, 3, 4], y: [16, 5, 11, 9], type: 'scatter', name: 'NODDI-NDI' },
+          'Free Water Fraction - FWF': { x: [1, 2, 3, 4], y: [8, 10, 7, 12], type: 'scatter', name: 'NODDI-FWF' },
         }
       }
     };
 
     function desenhar(aba, selecionadas) {
-      const layout = { title: `Visualização ${aba}`, margin: { t: 50 }, paper_bgcolor: 'white', plot_bgcolor: 'white' };
+      const layout = {
+        title: `${aba} Metrics`,
+        margin: { t: 50 },
+        paper_bgcolor: 'white',
+        plot_bgcolor: 'white'
+      };
       const data = selecionadas.map(nome => dados[aba].curvas[nome]);
       Plotly.newPlot('grafico', data, layout, { responsive: true });
     }
 
     function criarCheckboxes(aba) {
       const container = document.getElementById('opcoes');
-      container.innerHTML = '';
+      container.innerHTML = `<h3>${aba} Metrics</h3>`;
       const grupo = document.createElement('div');
       grupo.className = 'checkbox-group';
 
@@ -132,10 +154,10 @@
         const input = document.createElement('input');
         input.type = 'checkbox';
         input.value = nome;
-        input.checked = true; // começa marcado
+        input.checked = true;
         input.addEventListener('change', () => atualizarGrafico(aba));
         label.appendChild(input);
-        label.append(' ' + nome);
+        label.append(nome);
         grupo.appendChild(label);
       });
 
@@ -154,9 +176,9 @@
       atualizarGrafico(aba);
     }
 
-    // inicializa na aba A
-    criarCheckboxes('A');
-    atualizarGrafico('A');
+    // inicializa na aba DTI
+    criarCheckboxes('DTI');
+    atualizarGrafico('DTI');
   </script>
 </body>
 </html>
