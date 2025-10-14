@@ -13,16 +13,23 @@ h1 { background:#2c3e50;color:white;margin:0;padding:20px; }
 .tab-button { padding:10px 20px; margin:0 5px; border:none; background:#bdc3c7; color:#2c3e50; cursor:pointer; border-radius:5px 5px 0 0; font-weight:bold; transition:0.2s; }
 .tab-button.active { background:#2c3e50; color:white; }
 
-.content { display:flex; justify-content:space-between; gap:20px; width:90%; max-width:1000px; margin:20px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); align-items:flex-start; }
-#grafico { flex:1; height:700px; }
-#opcoes { width:280px; text-align:left; background:#ecf0f1; padding:15px; border-radius:8px; box-shadow: inset 0 0 3px rgba(0,0,0,0.1); font-size:13px; line-height:1.3; }
-#rois { height:250px; }  /* Mostra mais linhas no seletor de ROIs */
-#metricas { height:80px; }
+.content { display:flex; justify-content:space-between; gap:20px; width:95%; max-width:1500px; margin:20px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.1); align-items:flex-start; }
+
+#grafico { flex-grow:2; flex-basis:900px; height:750px; } /* Gráfico mais largo e mais alto */
+#opcoes { width:300px; text-align:left; background:#ecf0f1; padding:15px; border-radius:8px; box-shadow: inset 0 0 3px rgba(0,0,0,0.1); font-size:13px; line-height:1.3; }
 
 #opcoes label { display:block; margin-bottom:5px; cursor:pointer; }
 #opcoes input, #opcoes select { width:100%; margin-bottom:8px; }
-#user-form button { width:100%; padding:5px; background:#2c3e50; color:white; border:none; border-radius:5px; cursor:pointer; margin-top:5px; }
+#rois { height:300px; }  /* Mostra mais linhas */
+#metricas { height:100px; }
+
+#user-form { margin-top:10px; }
+#user-toggle { background:#2c3e50; color:white; border:none; padding:6px 10px; border-radius:5px; width:100%; cursor:pointer; font-weight:bold; }
+#user-fields { display:none; margin-top:8px; }
+#user-fields input { width:100%; margin-bottom:5px; }
+#user-fields button { width:100%; padding:5px; background:#2c3e50; color:white; border:none; border-radius:5px; cursor:pointer; }
 </style>
+
 </head>
 <body>
 <h1>7TBRP Diffusion MRI Normative Charts</h1>
@@ -179,18 +186,25 @@ function criarPainel(aba){
   container.appendChild(document.createTextNode('ROIs:'));
   container.appendChild(selROIs);
 
-  // formulário usuário
-  const form = document.createElement('div');
-  form.id='user-form';
-  form.innerHTML = `
-    <h4>Add your plot</h4>
+// formulário usuário (escondido por padrão)
+const form = document.createElement('div');
+form.id = 'user-form';
+form.innerHTML = `
+  <button id="user-toggle" onclick="toggleUserFields()">➕ Add your plot</button>
+  <div id="user-fields">
     X (comma): <input type="text" id="user-x" placeholder="1,2,3,4"><br>
     Y (comma): <input type="text" id="user-y" placeholder="10,15,13,17"><br>
     Nome: <input type="text" id="user-name" placeholder="Minha Curva"><br>
     <button onclick="adicionarCurva('${aba}')">Add curve</button>
-  `;
-  container.appendChild(form);
+  </div>
+`;
+container.appendChild(form);
+
+function toggleUserFields() {
+  const fields = document.getElementById('user-fields');
+  fields.style.display = (fields.style.display === 'none' || !fields.style.display) ? 'block' : 'none';
 }
+
 
 // adicionar curva do usuário com marcador quadrado, linha pontilhada e cor automática
 function adicionarCurva(aba){
