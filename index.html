@@ -12,9 +12,18 @@
   .container { display:flex; flex-wrap:wrap; gap:20px; padding:20px; justify-content:center; align-items:flex-start; }
 
   /* Coluna esquerda: Metrics + ROIs */
-  .panel { flex: 0 0 250px; background:white; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); max-height:600px; overflow:auto; }
-  .panel label { display:block; margin-bottom:3px; font-size:13px; }
-  select { width:100%; }
+  .left-panel {
+    flex: 0 0 300px;       /* largura maior */
+    background:white;
+    padding:15px;
+    border-radius:8px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+    max-height:600px;
+    overflow:auto;         /* scroll para o painel inteiro */
+    display:flex;
+    flex-direction:column;
+    gap:10px;              /* espaço entre metricas e ROIs */
+  }
 
   /* Coluna central: Curva personalizada */
   .custom-curve { flex: 0 0 200px; background:white; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); max-height:250px; }
@@ -38,96 +47,100 @@
 
 <div class="container">
   <!-- Coluna esquerda: Metrics + ROIs -->
-  <div class="panel">
-    <strong>Diffusion Metrics:</strong><br>
-    <select id="metricas" multiple size="10">
-      <option value="DTI-Fractional Anisotropy (FA)" selected>DTI-Fractional Anisotropy (FA)</option>
-      <option value="DTI-Axial Diffusivity (AD)">DTI-Axial Diffusivity (AD)</option>
-      <option value="DTI-Mean Diffusivity (MD)">DTI-Mean Diffusivity (MD)</option>
-      <option value="DTI-Radial Diffusivity (RD)">DTI-Radial Diffusivity (RD)</option>
-      <option value="DKI-Axial Kurtosis (AK)">DKI-Axial Kurtosis (AK)</option>
-      <option value="DKI-Mean Kurtosis (MK)">DKI-Mean Kurtosis (MK)</option>
-      <option value="DKI-Radial Kurtosis (RK)">DKI-Radial Kurtosis (RK)</option>
-      <option value="NODDI-Orientation Dispersion Index (ODI)">NODDI-Orientation Dispersion Index (ODI)</option>
-      <option value="NODDI-Neurite Density Index (NDI)">NODDI-Neurite Density Index (NDI)</option>
-      <option value="NODDI-Free Water Fraction (FWF)">NODDI-Free Water Fraction (FWF)</option>
-    </select>
+  <div class="left-panel">
+    <div>
+      <strong>Diffusion Metrics:</strong><br>
+      <select id="metricas" multiple size="10">
+        <option value="DTI-Fractional Anisotropy (FA)" selected>DTI-Fractional Anisotropy (FA)</option>
+        <option value="DTI-Axial Diffusivity (AD)">DTI-Axial Diffusivity (AD)</option>
+        <option value="DTI-Mean Diffusivity (MD)">DTI-Mean Diffusivity (MD)</option>
+        <option value="DTI-Radial Diffusivity (RD)">DTI-Radial Diffusivity (RD)</option>
+        <option value="DKI-Axial Kurtosis (AK)">DKI-Axial Kurtosis (AK)</option>
+        <option value="DKI-Mean Kurtosis (MK)">DKI-Mean Kurtosis (MK)</option>
+        <option value="DKI-Radial Kurtosis (RK)">DKI-Radial Kurtosis (RK)</option>
+        <option value="NODDI-Orientation Dispersion Index (ODI)">NODDI-Orientation Dispersion Index (ODI)</option>
+        <option value="NODDI-Neurite Density Index (NDI)">NODDI-Neurite Density Index (NDI)</option>
+        <option value="NODDI-Free Water Fraction (FWF)">NODDI-Free Water Fraction (FWF)</option>
+      </select>
+    </div>
 
-    <strong style="margin-top:10px; display:block;">ROIs:</strong><br>
-    <select id="rois" multiple size="30">
-      <option value="AF-L: Arcuate fascicle (L)">AF-L: Arcuate fascicle (L)</option>
-      <option value="AF-R: Arcuate fascicle (R)">AF-R: Arcuate fascicle (R)</option>
-      <option value="ATR-L: Anterior Thalamic Radiation (L)">ATR-L: Anterior Thalamic Radiation (L)</option>
-      <option value="ATR-R: Anterior Thalamic Radiation (R)">ATR-R: Anterior Thalamic Radiation (R)</option>
-      <option value="CA: Commissure Anterior">CA: Commissure Anterior</option>
-      <option value="CC-1: Rostrum">CC-1: Rostrum</option>
-      <option value="CC-2: Genu">CC-2: Genu</option>
-      <option value="CC-3: Rostral Body (PreMotor)">CC-3: Rostral Body (PreMotor)</option>
-      <option value="CC-4: Anterior midbody (Primary Motor)">CC-4: Anterior midbody (Primary Motor)</option>
-      <option value="CC-5: Posterior midbody (Primary Somatosensory)">CC-5: Posterior midbody (Primary Somatosensory)</option>
-      <option value="CC-6: Isthmus">CC-6: Isthmus</option>
-      <option value="CC-7: Splenium">CC-7: Splenium</option>
-      <option value="CG-L: Cingulum (L)">CG-L: Cingulum (L)</option>
-      <option value="CG-R: Cingulum (R)">CG-R: Cingulum (R)</option>
-      <option value="CST-L: Corticospinal tract (L)">CST-L: Corticospinal tract (L)</option>
-      <option value="CST-R: Corticospinal tract (R)">CST-R: Corticospinal tract (R)</option>
-      <option value="MLF-L: Middle longitudinal fascicle (L)">MLF-L: Middle longitudinal fascicle (L)</option>
-      <option value="MLF-R: Middle longitudinal fascicle (R)">MLF-R: Middle longitudinal fascicle (R)</option>
-      <option value="FPT-L: Fronto-pontine tract (L)">FPT-L: Fronto-pontine tract (L)</option>
-      <option value="FPT-R: Fronto-pontine tract (R)">FPT-R: Fronto-pontine tract (R)</option>
-      <option value="FX-L: Fornix (L)">FX-L: Fornix (L)</option>
-      <option value="FX-R: Fornix (R)">FX-R: Fornix (R)</option>
-      <option value="ICP-L: Inferior cerebellar peduncle (L)">ICP-L: Inferior cerebellar peduncle (L)</option>
-      <option value="ICP-R: Inferior cerebellar peduncle (R)">ICP-R: Inferior cerebellar peduncle (R)</option>
-      <option value="IFO-L: Inferior occipito-frontal fascicle (L)">IFO-L: Inferior occipito-frontal fascicle (L)</option>
-      <option value="IFO-R: Inferior occipito-frontal fascicle (R)">IFO-R: Inferior occipito-frontal fascicle (R)</option>
-      <option value="ILF-L: Inferior longitudinal fascicle (L)">ILF-L: Inferior longitudinal fascicle (L)</option>
-      <option value="ILF-R: Inferior longitudinal fascicle (R)">ILF-R: Inferior longitudinal fascicle (R)</option>
-      <option value="MCP: Middle cerebellar peduncle">MCP: Middle cerebellar peduncle</option>
-      <option value="OR-L: Optic radiation (L)">OR-L: Optic radiation (L)</option>
-      <option value="OR-R: Optic radiation (R)">OR-R: Optic radiation (R)</option>
-      <option value="POPT-L: Parieto‐occipital pontine (L)">POPT-L: Parieto‐occipital pontine (L)</option>
-      <option value="POPT-R: Parieto‐occipital pontine (R)">POPT-R: Parieto‐occipital pontine (R)</option>
-      <option value="SCP-L: Superior cerebellar peduncle (L)">SCP-L: Superior cerebellar peduncle (L)</option>
-      <option value="SCP-R: Superior cerebellar peduncle (R)">SCP-R: Superior cerebellar peduncle (R)</option>
-      <option value="SLF-I-L: Superior longitudinal fascicle I (L)">SLF-I-L: Superior longitudinal fascicle I (L)</option>
-      <option value="SLF-I-R: Superior longitudinal fascicle I (R)">SLF-I-R: Superior longitudinal fascicle I (R)</option>
-      <option value="SLF-II-L: Superior longitudinal fascicle II (L)">SLF-II-L: Superior longitudinal fascicle II (L)</option>
-      <option value="SLF-II-R: Superior longitudinal fascicle II (R)">SLF-II-R: Superior longitudinal fascicle II (R)</option>
-      <option value="SLF-III-L: Superior longitudinal fascicle III (L)">SLF-III-L: Superior longitudinal fascicle III (L)</option>
-      <option value="SLF-III-R: Superior longitudinal fascicle III (R)">SLF-III-R: Superior longitudinal fascicle III (R)</option>
-      <option value="STR-L: Superior Thalamic Radiation (L)">STR-L: Superior Thalamic Radiation (L)</option>
-      <option value="STR-R: Superior Thalamic Radiation (R)">STR-R: Superior Thalamic Radiation (R)</option>
-      <option value="UF-L: Uncinate fascicle (L)">UF-L: Uncinate fascicle (L)</option>
-      <option value="UF-R: Uncinate fascicle (R)">UF-R: Uncinate fascicle (R)</option>
-      <option value="CC: Corpus Callosum">CC: Corpus Callosum</option>
-      <option value="T_PREF-L: Thalamo-prefrontal (L)">T_PREF-L: Thalamo-prefrontal (L)</option>
-      <option value="T_PREF-R: Thalamo-prefrontal (R)">T_PREF-R: Thalamo-prefrontal (R)</option>
-      <option value="T_PREM-L: Thalamo-premotor (L)">T_PREM-L: Thalamo-premotor (L)</option>
-      <option value="T_PREM-R:Thalamo-premotor (R)">T_PREM-R:Thalamo-premotor (R)</option>
-      <option value="T_PREC-L: Thalamo-precentral (L)">T_PREC-L: Thalamo-precentral (L)</option>
-      <option value="T_PREC-R: Thalamo-precentral (R)">T_PREC-R: Thalamo-precentral (R)</option>
-      <option value="T_POSTC-L: Thalamo-postcentral (L)">T_POSTC-L: Thalamo-postcentral (L)</option>
-      <option value="T_POSTC-R: Thalamo-postcentral (R)">T_POSTC-R: Thalamo-postcentral (R)</option>
-      <option value="T-PAR-L: Thalamo-parietal (L)">T-PAR-L: Thalamo-parietal (L)</option>
-      <option value="T-PAR-R: Thalamo-parietal (R)">T-PAR-R: Thalamo-parietal (R)</option>
-      <option value="T-OCC-L: Thalamo-occipital (L)">T-OCC-L: Thalamo-occipital (L)</option>
-      <option value="T-OCC-R: Thalamo-occipital (R)">T-OCC-R: Thalamo-occipital (R)</option>
-      <option value="ST-FO-L: Striato-fronto-orbital (L)">ST-FO-L: Striato-fronto-orbital (L)</option>
-      <option value="ST-FO-R: Striato-fronto-orbital (R)">ST-FO-R: Striato-fronto-orbital (R)</option>
-      <option value="ST-PREF-L: Striato-prefrontal (L)">ST-PREF-L: Striato-prefrontal (L)</option>
-      <option value="ST-PREF-R: Striato-prefrontal (R)">ST-PREF-R: Striato-prefrontal (R)</option>
-      <option value="ST-PREM-L: Striato-premotor (L)">ST-PREM-L: Striato-premotor (L)</option>
-      <option value="ST-PREM-R: Striato-premotor (R)">ST-PREM-R: Striato-premotor (R)</option>
-      <option value="ST-PREC-L: Striato-precentral (L)">ST-PREC-L: Striato-precentral (L)</option>
-      <option value="ST-PREC-R: Striato-precentral (R)">ST-PREC-R: Striato-precentral (R)</option>
-      <option value="ST-POSTC-L: Striato-postcentral (L)">ST-POSTC-L: Striato-postcentral (L)</option>
-      <option value="ST-POSTC-R: Striato-postcentral (R)">ST-POSTC-R: Striato-postcentral (R)</option>
-      <option value="ST-PAR-L: Striato-parietal (L)">ST-PAR-L: Striato-parietal (L)</option>
-      <option value="ST-PAR-R:Striato-parietal (R)">ST-PAR-R:Striato-parietal (R)</option>
-      <option value="ST-OCC-L:Striato-occipital (L)">ST-OCC-L:Striato-occipital (L)</option>
-      <option value="ST-OCC-R:Striato-occipital (R)">ST-OCC-R:Striato-occipital (R)</option>
-    </select>
+    <div>
+      <strong>ROIs:</strong><br>
+      <select id="rois" multiple size="30">
+        <option value="AF-L: Arcuate fascicle (L)">AF-L: Arcuate fascicle (L)</option>
+        <option value="AF-R: Arcuate fascicle (R)">AF-R: Arcuate fascicle (R)</option>
+        <option value="ATR-L: Anterior Thalamic Radiation (L)">ATR-L: Anterior Thalamic Radiation (L)</option>
+        <option value="ATR-R: Anterior Thalamic Radiation (R)">ATR-R: Anterior Thalamic Radiation (R)</option>
+        <option value="CA: Commissure Anterior">CA: Commissure Anterior</option>
+        <option value="CC-1: Rostrum">CC-1: Rostrum</option>
+        <option value="CC-2: Genu">CC-2: Genu</option>
+        <option value="CC-3: Rostral Body (PreMotor)">CC-3: Rostral Body (PreMotor)</option>
+        <option value="CC-4: Anterior midbody (Primary Motor)">CC-4: Anterior midbody (Primary Motor)</option>
+        <option value="CC-5: Posterior midbody (Primary Somatosensory)">CC-5: Posterior midbody (Primary Somatosensory)</option>
+        <option value="CC-6: Isthmus">CC-6: Isthmus</option>
+        <option value="CC-7: Splenium">CC-7: Splenium</option>
+        <option value="CG-L: Cingulum (L)">CG-L: Cingulum (L)</option>
+        <option value="CG-R: Cingulum (R)">CG-R: Cingulum (R)</option>
+        <option value="CST-L: Corticospinal tract (L)">CST-L: Corticospinal tract (L)</option>
+        <option value="CST-R: Corticospinal tract (R)">CST-R: Corticospinal tract (R)</option>
+        <option value="MLF-L: Middle longitudinal fascicle (L)">MLF-L: Middle longitudinal fascicle (L)</option>
+        <option value="MLF-R: Middle longitudinal fascicle (R)">MLF-R: Middle longitudinal fascicle (R)</option>
+        <option value="FPT-L: Fronto-pontine tract (L)">FPT-L: Fronto-pontine tract (L)</option>
+        <option value="FPT-R: Fronto-pontine tract (R)">FPT-R: Fronto-pontine tract (R)</option>
+        <option value="FX-L: Fornix (L)">FX-L: Fornix (L)</option>
+        <option value="FX-R: Fornix (R)">FX-R: Fornix (R)</option>
+        <option value="ICP-L: Inferior cerebellar peduncle (L)">ICP-L: Inferior cerebellar peduncle (L)</option>
+        <option value="ICP-R: Inferior cerebellar peduncle (R)">ICP-R: Inferior cerebellar peduncle (R)</option>
+        <option value="IFO-L: Inferior occipito-frontal fascicle (L)">IFO-L: Inferior occipito-frontal fascicle (L)</option>
+        <option value="IFO-R: Inferior occipito-frontal fascicle (R)">IFO-R: Inferior occipito-frontal fascicle (R)</option>
+        <option value="ILF-L: Inferior longitudinal fascicle (L)">ILF-L: Inferior longitudinal fascicle (L)</option>
+        <option value="ILF-R: Inferior longitudinal fascicle (R)">ILF-R: Inferior longitudinal fascicle (R)</option>
+        <option value="MCP: Middle cerebellar peduncle">MCP: Middle cerebellar peduncle</option>
+        <option value="OR-L: Optic radiation (L)">OR-L: Optic radiation (L)</option>
+        <option value="OR-R: Optic radiation (R)">OR-R: Optic radiation (R)</option>
+        <option value="POPT-L: Parieto‐occipital pontine (L)">POPT-L: Parieto‐occipital pontine (L)</option>
+        <option value="POPT-R: Parieto‐occipital pontine (R)">POPT-R: Parieto‐occipital pontine (R)</option>
+        <option value="SCP-L: Superior cerebellar peduncle (L)">SCP-L: Superior cerebellar peduncle (L)</option>
+        <option value="SCP-R: Superior cerebellar peduncle (R)">SCP-R: Superior cerebellar peduncle (R)</option>
+        <option value="SLF-I-L: Superior longitudinal fascicle I (L)">SLF-I-L: Superior longitudinal fascicle I (L)</option>
+        <option value="SLF-I-R: Superior longitudinal fascicle I (R)">SLF-I-R: Superior longitudinal fascicle I (R)</option>
+        <option value="SLF-II-L: Superior longitudinal fascicle II (L)">SLF-II-L: Superior longitudinal fascicle II (L)</option>
+        <option value="SLF-II-R: Superior longitudinal fascicle II (R)">SLF-II-R: Superior longitudinal fascicle II (R)</option>
+        <option value="SLF-III-L: Superior longitudinal fascicle III (L)">SLF-III-L: Superior longitudinal fascicle III (L)</option>
+        <option value="SLF-III-R: Superior longitudinal fascicle III (R)">SLF-III-R: Superior longitudinal fascicle III (R)</option>
+        <option value="STR-L: Superior Thalamic Radiation (L)">STR-L: Superior Thalamic Radiation (L)</option>
+        <option value="STR-R: Superior Thalamic Radiation (R)">STR-R: Superior Thalamic Radiation (R)</option>
+        <option value="UF-L: Uncinate fascicle (L)">UF-L: Uncinate fascicle (L)</option>
+        <option value="UF-R: Uncinate fascicle (R)">UF-R: Uncinate fascicle (R)</option>
+        <option value="CC: Corpus Callosum">CC: Corpus Callosum</option>
+        <option value="T_PREF-L: Thalamo-prefrontal (L)">T_PREF-L: Thalamo-prefrontal (L)</option>
+        <option value="T_PREF-R: Thalamo-prefrontal (R)">T_PREF-R: Thalamo-prefrontal (R)</option>
+        <option value="T_PREM-L: Thalamo-premotor (L)">T_PREM-L: Thalamo-premotor (L)</option>
+        <option value="T_PREM-R:Thalamo-premotor (R)">T_PREM-R:Thalamo-premotor (R)</option>
+        <option value="T_PREC-L: Thalamo-precentral (L)">T_PREC-L: Thalamo-precentral (L)</option>
+        <option value="T_PREC-R: Thalamo-precentral (R)">T_PREC-R: Thalamo-precentral (R)</option>
+        <option value="T_POSTC-L: Thalamo-postcentral (L)">T_POSTC-L: Thalamo-postcentral (L)</option>
+        <option value="T_POSTC-R: Thalamo-postcentral (R)">T_POSTC-R: Thalamo-postcentral (R)</option>
+        <option value="T-PAR-L: Thalamo-parietal (L)">T-PAR-L: Thalamo-parietal (L)</option>
+        <option value="T-PAR-R: Thalamo-parietal (R)">T-PAR-R: Thalamo-parietal (R)</option>
+        <option value="T-OCC-L: Thalamo-occipital (L)">T-OCC-L: Thalamo-occipital (L)</option>
+        <option value="T-OCC-R: Thalamo-occipital (R)">T-OCC-R: Thalamo-occipital (R)</option>
+        <option value="ST-FO-L: Striato-fronto-orbital (L)">ST-FO-L: Striato-fronto-orbital (L)</option>
+        <option value="ST-FO-R: Striato-fronto-orbital (R)">ST-FO-R: Striato-fronto-orbital (R)</option>
+        <option value="ST-PREF-L: Striato-prefrontal (L)">ST-PREF-L: Striato-prefrontal (L)</option>
+        <option value="ST-PREF-R: Striato-prefrontal (R)">ST-PREF-R: Striato-prefrontal (R)</option>
+        <option value="ST-PREM-L: Striato-premotor (L)">ST-PREM-L: Striato-premotor (L)</option>
+        <option value="ST-PREM-R: Striato-premotor (R)">ST-PREM-R: Striato-premotor (R)</option>
+        <option value="ST-PREC-L: Striato-precentral (L)">ST-PREC-L: Striato-precentral (L)</option>
+        <option value="ST-PREC-R: Striato-precentral (R)">ST-PREC-R: Striato-precentral (R)</option>
+        <option value="ST-POSTC-L: Striato-postcentral (L)">ST-POSTC-L: Striato-postcentral (L)</option>
+        <option value="ST-POSTC-R: Striato-postcentral (R)">ST-POSTC-R: Striato-postcentral (R)</option>
+        <option value="ST-PAR-L: Striato-parietal (L)">ST-PAR-L: Striato-parietal (L)</option>
+        <option value="ST-PAR-R:Striato-parietal (R)">ST-PAR-R:Striato-parietal (R)</option>
+        <option value="ST-OCC-L:Striato-occipital (L)">ST-OCC-L:Striato-occipital (L)</option>
+        <option value="ST-OCC-R:Striato-occipital (R)">ST-OCC-R:Striato-occipital (R)</option>
+      </select>
+    </div>
   </div>
 
   <!-- Coluna central: Curva personalizada -->
