@@ -9,7 +9,6 @@
   body {
     font-family: 'Inter', sans-serif;
     margin: 0;
-    padding: 0;
     background-color: #fafafa;
     color: #333;
   }
@@ -21,7 +20,6 @@
     text-align: center;
     font-size: 22px;
     font-weight: 600;
-    letter-spacing: 0.5px;
   }
 
   .tabs {
@@ -70,7 +68,7 @@
   .checkbox-group {
     flex: 1;
     min-width: 220px;
-    max-height: 300px; /* Aumenta área das ROIs */
+    max-height: 300px;
     overflow-y: auto;
     background: #fff;
     padding: 10px;
@@ -87,7 +85,7 @@
   .graph-container {
     flex: 3;
     min-width: 500px;
-    height: 600px; /* Gráfico maior */
+    height: 600px;
   }
 
   .custom-curve {
@@ -121,6 +119,25 @@
 <body>
   <header>7TBRP Diffusion MRI Normative Charts</header>
 
+  <!-- ROIs globais -->
+  <div style="padding:20px; display:flex; justify-content:center;">
+    <div class="checkbox-group" id="roisGlobal">
+      <strong>ROIs:</strong><br>
+      <label><input type="checkbox" value="Corpus Callosum" checked> Corpus Callosum</label>
+      <label><input type="checkbox" value="Corticospinal Tract"> Corticospinal Tract</label>
+      <label><input type="checkbox" value="Cingulum"> Cingulum</label>
+      <label><input type="checkbox" value="Thalamus"> Thalamus</label>
+      <label><input type="checkbox" value="Internal Capsule"> Internal Capsule</label>
+      <label><input type="checkbox" value="Optic Radiation"> Optic Radiation</label>
+      <label><input type="checkbox" value="Superior Longitudinal Fasciculus"> SLF</label>
+      <label><input type="checkbox" value="Inferior Fronto-Occipital Fasciculus"> IFOF</label>
+      <label><input type="checkbox" value="Arcuate Fasciculus"> Arcuate</label>
+      <label><input type="checkbox" value="Fornix"> Fornix</label>
+      <label><input type="checkbox" value="Uncinate Fasciculus"> Uncinate</label>
+      <label><input type="checkbox" value="Cerebellar Peduncle"> Cerebellar Peduncle</label>
+    </div>
+  </div>
+
   <div class="tabs">
     <div class="tab active" onclick="showTab('aba1')">Aba 1</div>
     <div class="tab" onclick="showTab('aba2')">Aba 2</div>
@@ -133,22 +150,6 @@
         <label><input type="checkbox" value="FA" checked> FA</label>
         <label><input type="checkbox" value="MD"> MD</label>
         <label><input type="checkbox" value="RD"> RD</label>
-      </div>
-
-      <div class="checkbox-group" id="rois1">
-        <strong>ROIs:</strong><br>
-        <label><input type="checkbox" value="Corpus Callosum" checked> Corpus Callosum</label>
-        <label><input type="checkbox" value="Corticospinal Tract"> Corticospinal Tract</label>
-        <label><input type="checkbox" value="Cingulum"> Cingulum</label>
-        <label><input type="checkbox" value="Thalamus"> Thalamus</label>
-        <label><input type="checkbox" value="Internal Capsule"> Internal Capsule</label>
-        <label><input type="checkbox" value="Optic Radiation"> Optic Radiation</label>
-        <label><input type="checkbox" value="Superior Longitudinal Fasciculus"> SLF</label>
-        <label><input type="checkbox" value="Inferior Fronto-Occipital Fasciculus"> IFOF</label>
-        <label><input type="checkbox" value="Arcuate Fasciculus"> Arcuate</label>
-        <label><input type="checkbox" value="Fornix"> Fornix</label>
-        <label><input type="checkbox" value="Uncinate Fasciculus"> Uncinate</label>
-        <label><input type="checkbox" value="Cerebellar Peduncle"> Cerebellar Peduncle</label>
       </div>
 
       <div class="graph-container" id="graph1"></div>
@@ -171,16 +172,6 @@
         <label><input type="checkbox" value="FA" checked> FA</label>
         <label><input type="checkbox" value="MD"> MD</label>
         <label><input type="checkbox" value="AD"> AD</label>
-      </div>
-
-      <div class="checkbox-group" id="rois2">
-        <strong>ROIs:</strong><br>
-        <label><input type="checkbox" value="Corpus Callosum" checked> Corpus Callosum</label>
-        <label><input type="checkbox" value="Corticospinal Tract"> Corticospinal Tract</label>
-        <label><input type="checkbox" value="Cingulum"> Cingulum</label>
-        <label><input type="checkbox" value="Thalamus"> Thalamus</label>
-        <label><input type="checkbox" value="Optic Radiation"> Optic Radiation</label>
-        <label><input type="checkbox" value="Superior Longitudinal Fasciculus"> SLF</label>
       </div>
 
       <div class="graph-container" id="graph2"></div>
@@ -210,13 +201,13 @@ function getSelectedValues(containerId) {
 
 function plotGraph(graphId) {
   const metrics = getSelectedValues(graphId === 'graph1' ? 'metrics1' : 'metrics2');
-  const rois = getSelectedValues(graphId === 'graph1' ? 'rois1' : 'rois2');
+  const rois = getSelectedValues('roisGlobal');
   const traces = [];
 
   const x = [0, 10, 20, 30, 40, 50];
   for (let m of metrics) {
     for (let r of rois) {
-      const y = x.map(v => Math.random() * 0.2 + 0.4); // dados fictícios
+      const y = x.map(() => Math.random() * 0.2 + 0.4); // dados fictícios
       traces.push({
         x, y,
         mode: 'lines',
@@ -257,8 +248,8 @@ function addCustomCurve(graphId) {
 
 document.querySelectorAll('input[type=checkbox]').forEach(el => {
   el.addEventListener('change', () => {
-    if (el.closest('#aba1')) plotGraph('graph1');
-    else plotGraph('graph2');
+    plotGraph('graph1');
+    plotGraph('graph2');
   });
 });
 
