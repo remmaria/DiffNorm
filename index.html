@@ -168,11 +168,11 @@
       const form = document.createElement('div');
       form.id = 'user-form';
       form.innerHTML = `
-        <h4>Adicionar sua curva</h4>
+        <h4>Insert your data:</h4>
         X (vírgula): <input type="text" id="user-x" placeholder="1,2,3,4"><br>
         Y (vírgula): <input type="text" id="user-y" placeholder="10,15,13,17"><br>
         Nome: <input type="text" id="user-name" placeholder="Minha Curva"><br>
-        <button onclick="adicionarCurva('${aba}')">Adicionar curva</button>
+        <button onclick="adicionarCurva('${aba}')">Insert data</button>
       `;
       container.appendChild(form);
 
@@ -207,7 +207,15 @@
 
       if (x.length !== y.length) { alert('X e Y devem ter o mesmo tamanho!'); return; }
 
-      userCurves[aba][nome] = { x, y, type: 'scatter', name: nome };
+      userCurves[aba][nome] = { 
+          x, 
+          y, 
+          type: 'scatter', 
+          name: nome,
+          mode: 'lines+markers',
+          line: { dash: 'dot', width: 2 },
+          marker: { size: 8, symbol: 'squared'}
+        };
       criarCheckboxes(aba);
       desenhar(aba);
     }
