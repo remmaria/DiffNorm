@@ -96,17 +96,19 @@
 
 <div class="container">
   <div class="metrics">
-    <strong>Diffusion Metrics:</strong><br>
-    <label><input type="checkbox" value="DTI-FA" checked> DTI-FA</label>
-    <label><input type="checkbox" value="DTI-AD"> DTI-AD</label>
-    <label><input type="checkbox" value="DTI-MD"> DTI-MD</label>
-    <label><input type="checkbox" value="DTI-RD"> DTI-RD</label>
-    <label><input type="checkbox" value="DKI-AK"> DKI-AK</label>
-    <label><input type="checkbox" value="DKI-MK"> DKI-MK</label>
-    <label><input type="checkbox" value="DKI-RK"> DKI-RK</label>
-    <label><input type="checkbox" value="NODDI-ODI"> NODDI-ODI</label>
-    <label><input type="checkbox" value="NODDI-NDI"> NODDI-NDI</label>
-    <label><input type="checkbox" value="NODDI-FWF"> NODDI-FWF</label>
+    <label for="metricas"><strong>Diffusion Metrics:</strong></label>
+    <select id="metricas" multiple size="8">
+      <option value="DTI-Fractional Anisotropy (FA)" selected>DTI-Fractional Anisotropy (FA)</option>
+      <option value="DTI-Axial Diffusivity (AD)">DTI-Axial Diffusivity (AD)</option>
+      <option value="DTI-Mean Diffusivity (MD)">DTI-Mean Diffusivity (MD)</option>
+      <option value="DTI-Radial Diffusivity (RD)">DTI-Radial Diffusivity (RD)</option>
+      <option value="DKI-Axial Kurtosis (AK)">DKI-Axial Kurtosis (AK)</option>
+      <option value="DKI-Mean Kurtosis (MK)">DKI-Mean Kurtosis (MK)</option>
+      <option value="DKI-Radial Kurtosis (RK)">DKI-Radial Kurtosis (RK)</option>
+      <option value="NODDI-Orientation Dispersion Index (ODI)">NODDI-Orientation Dispersion Index (ODI)</option>
+      <option value="NODDI-Neurite Density Index (NDI)">NODDI-Neurite Density Index (NDI)</option>
+      <option value="NODDI-Free Water Fraction (FWF)">NODDI-Free Water Fraction (FWF)</option>
+    </select>
   </div>
 
   <div class="rois">
