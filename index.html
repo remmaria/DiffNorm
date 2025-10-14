@@ -10,16 +10,17 @@
   header { background:#2c3e50; color:white; padding:20px; text-align:center; font-size:22px; font-weight:bold; }
 
   .container { display:flex; flex-wrap:wrap; gap:20px; padding:20px; justify-content:center; }
+  
   .panel { background:white; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); min-width:220px; max-height:600px; overflow:auto; }
   .panel label { display:block; margin-bottom:3px; font-size:13px; }
   select { width:100%; }
-  
-  .graph-container { flex:1 1 600px; min-width:400px; height:600px; }
 
-  .custom-curve { background:white; padding:15px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-top:10px; min-width:220px; }
-  .custom-curve input, .custom-curve button { width:100%; margin:5px 0; padding:6px; border-radius:5px; border:1px solid #ccc; }
+  .custom-curve { background:white; padding:10px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); min-width:200px; max-height:250px; overflow:auto; }
+  .custom-curve input, .custom-curve button { width:100%; margin:4px 0; padding:5px; border-radius:5px; border:1px solid #ccc; font-size:13px; }
   .custom-curve button { background:#2c3e50; color:white; cursor:pointer; font-weight:bold; }
   .custom-curve button:hover { background:#1a2a38; }
+
+  .graph-container { flex:1 1 600px; min-width:400px; height:600px; }
 
   @media(max-width:1000px) {
     .container { flex-direction:column; align-items:center; }
@@ -31,7 +32,7 @@
 <header>7TBRP Diffusion MRI Normative Charts</header>
 
 <div class="container">
-  <!-- Painel Métricas -->
+  <!-- Coluna esquerda: Métricas + ROIs -->
   <div class="panel">
     <strong>Diffusion Metrics:</strong><br>
     <select id="metricas" multiple size="10">
@@ -46,11 +47,8 @@
       <option value="NODDI-Neurite Density Index (NDI)">NODDI-Neurite Density Index (NDI)</option>
       <option value="NODDI-Free Water Fraction (FWF)">NODDI-Free Water Fraction (FWF)</option>
     </select>
-  </div>
 
-  <!-- Painel ROIs -->
-  <div class="panel">
-    <strong>ROIs:</strong><br>
+    <strong style="margin-top:15px;">ROIs:</strong><br>
     <select id="rois" multiple size="20">
       <option value="AF-L: Arcuate fascicle (L)">AF-L: Arcuate fascicle (L)</option>
       <option value="AF-R: Arcuate fascicle (R)">AF-R: Arcuate fascicle (R)</option>
@@ -68,24 +66,11 @@
       <option value="CG-R: Cingulum (R)">CG-R: Cingulum (R)</option>
       <option value="CST-L: Corticospinal tract (L)">CST-L: Corticospinal tract (L)</option>
       <option value="CST-R: Corticospinal tract (R)">CST-R: Corticospinal tract (R)</option>
-      <option value="MLF-L: Middle longitudinal fascicle (L)">MLF-L: Middle longitudinal fascicle (L)</option>
-      <option value="MLF-R: Middle longitudinal fascicle (R)">MLF-R: Middle longitudinal fascicle (R)</option>
-      <option value="FPT-L: Fronto-pontine tract (L)">FPT-L: Fronto-pontine tract (L)</option>
-      <option value="FPT-R: Fronto-pontine tract (R)">FPT-R: Fronto-pontine tract (R)</option>
-      <option value="FX-L: Fornix (L)">FX-L: Fornix (L)</option>
-      <option value="FX-R: Fornix (R)">FX-R: Fornix (R)</option>
-      <option value="ICP-L: Inferior cerebellar peduncle (L)">ICP-L: Inferior cerebellar peduncle (L)</option>
-      <option value="ICP-R: Inferior cerebellar peduncle (R)">ICP-R: Inferior cerebellar peduncle (R)</option>
-      <!-- continue com todas as demais ROIs completas -->
+      <!-- demais ROIs -->
     </select>
   </div>
 
-  <!-- Gráfico -->
-  <div class="graph-container" id="graph"></div>
-</div>
-
-<!-- Curva personalizada -->
-<div class="container">
+  <!-- Coluna do meio: Curva personalizada -->
   <div class="custom-curve">
     <h4>Adicionar curva personalizada</h4>
     <label>X (valores separados por vírgula):</label>
@@ -96,6 +81,9 @@
     <input type="text" id="curveName" placeholder="Minha Curva">
     <button onclick="addCustomCurve()">Adicionar curva</button>
   </div>
+
+  <!-- Coluna direita: Gráfico -->
+  <div class="graph-container" id="graph"></div>
 </div>
 
 <script>
@@ -111,8 +99,8 @@ function plotGraph() {
 
   metrics.forEach(m=>{
     rois.forEach(r=>{
-      const y = x.map(()=>Math.random()*0.2 + 0.4); // dados fictícios
-      traces.push({x, y, mode:'lines', name:`${r} - ${m}`, line:{width:2}});
+      const y = x.map(()=>Math.random()*0.2 + 0.4);
+      traces.push({x,y,mode:'lines',name:`${r} - ${m}`,line:{width:2}});
     });
   });
 
