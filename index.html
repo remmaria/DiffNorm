@@ -28,6 +28,14 @@
     height: 60px; /* ajusta o tamanho dos logos */
   }
   .container { display:flex; flex-wrap:wrap; gap:20px; padding:20px; justify-content:center; align-items:flex-start; }
+.panel {
+  width: 420px;           /* ou 250px, 300px… o que quiser */
+  flex: 0 0 420px;        /* impede expandir e garante largura fixa */
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
   select { width:100%; }
 
@@ -65,16 +73,18 @@
 <div class="container">
   <!-- Coluna esquerda: Metrics + ROIs -->
   <div class="panel">
-    <select id="metricas" multiple size="10">
+    <select id="metricas" multiple size="13">
       <optgroup label="Metrics - DTI">
         <option value="dti_fa" selected>DTI-Fractional Anisotropy (FA)</option>
         <option value="dti_ad">DTI-Axial Diffusivity (AD)</option>
         <option value="dti_md">DTI-Mean Diffusivity (MD)</option>
         <option value="dti_rd">DTI-Radial Diffusivity (RD)</option>
+      </optgroup>
       <optgroup label="Metrics - DKI">
         <option value="dki_ak">DKI-Axial Kurtosis (AK)</option>
         <option value="dki_mk">DKI-Mean Kurtosis (MK)</option>
         <option value="dki_rk">DKI-Radial Kurtosis (RK)</option>
+      </optgroup>
       <optgroup label="Metrics - NODDI">
         <option value="noddi_odi">NODDI-Orientation Dispersion Index (ODI)</option>
         <option value="noddi_ndi">NODDI-Neurite Density Index (NDI)</option>
@@ -83,123 +93,91 @@
     </select>
 
     <select id="rois" multiple size="20" >
-      <option value="mask3d_e1">Brain</option>
+      <optgroup label="ROIs - Global">
+        <option value="mask3d_e1">Brain</option>
+      </optgroup>
       <optgroup label="ROIs - SynthSeg">
         <option value="maskseg_CbWM_e1_e1">SynthSeg: Cerebral White Matter</option>
         <option value="maskseg_CbllWM_e1_e1">SynthSeg: Cerebellar White Matter</option>
         <option value="maskseg_Ctx_e1">SynthSeg: Cerebral Cortical</option>
         <option value="maskseg_SubCtx_e1">SynthSeg: Cerebral SubCortical</option>
         <option value="maskseg_Hipp_e1_e1">SynthSeg: Hippocampus</option>
-      <optgroup label="ROIs - JHU White Matter Atlas"></optgroup>
+      <optgroup label="ROIs - JHU White Matter Atlas">
         <option value="jhu_labels_">AF-L: Arcuate fascicle (L)</option>
+      </optgroup>
       <optgroup label="ROIs - TractSeg">
-<option value="AF_left">TractSeg: Left Arcuate fascicle (AF-L)</option>
-<option value="AF_right">TractSeg: Right Arcuate fascicle (AF-R)</option>
-
-<option value="ATR_left">TractSeg: Left Anterior Thalamic Radiation (ATR-L)</option>
-<option value="ATR_right">TractSeg: Right Anterior Thalamic Radiation (ATR-R)</option>
-
-<option value="CA">TractSeg: Commissure Anterior (CA)</option>
-
-<option value="CC_1">TractSeg: Rostrum of Corpus Callosum (CC-1)</option>
-<option value="CC_2">TractSeg: Genu of Corpus Callosum (CC-2)</option>
-<option value="CC_3">TractSeg: Rostral Body (PreMotor) (CC-3)</option>
-<option value="CC_4">TractSeg: Anterior Midbody (Primary Motor) (CC-4)</option>
-<option value="CC_5">TractSeg: Posterior Midbody (Primary Somatosensory) (CC-5)</option>
-<option value="CC_6">TractSeg: Isthmus (CC-6)</option>
-<option value="CC_7">TractSeg: Splenium (CC-7)</option>
-
-<option value="CG_left">TractSeg: Left Cingulum (CG-L)</option>
-<option value="CG_right">TractSeg: Right Cingulum (CG-R)</option>
-
-<option value="CST_left">TractSeg: Left Corticospinal tract (CST-L)</option>
-<option value="CST_right">TractSeg: Right Corticospinal tract (CST-R)</option>
-
-<option value="MLF_left">TractSeg: Left Middle longitudinal fascicle (MLF-L)</option>
-<option value="MLF_right">TractSeg: Right Middle longitudinal fascicle (MLF-R)</option>
-
-<option value="FPT_left">TractSeg: Left Fronto-pontine tract (FPT-L)</option>
-<option value="FPT_right">TractSeg: Right Fronto-pontine tract (FPT-R)</option>
-
-<option value="FX_left">TractSeg: Left Fornix (FX-L)</option>
-<option value="FX_right">TractSeg: Right Fornix (FX-R)</option>
-
-<option value="ICP_left">TractSeg: Left Inferior cerebellar peduncle (ICP-L)</option>
-<option value="ICP_right">TractSeg: Right Inferior cerebellar peduncle (ICP-R)</option>
-
-<option value="IFO_left">TractSeg: Left Inferior fronto-occipital fascicle (IFO-L)</option>
-<option value="IFO_right">TractSeg: Right Inferior fronto-occipital fascicle (IFO-R)</option>
-
-<option value="ILF_left">TractSeg: Left Inferior longitudinal fascicle (ILF-L)</option>
-<option value="ILF_right">TractSeg: Right Inferior longitudinal fascicle (ILF-R)</option>
-
-<option value="MCP">TractSeg: Middle cerebellar peduncle (MCP)</option>
-
-<option value="OR_left">TractSeg: Left Optic radiation (OR-L)</option>
-<option value="OR_right">TractSeg: Right Optic radiation (OR-R)</option>
-
-<option value="POPT_left">TractSeg: Left Parieto-occipital pontine tract (POPT-L)</option>
-<option value="POPT_right">TractSeg: Right Parieto-occipital pontine tract (POPT-R)</option>
-
-<option value="SCP_left">TractSeg: Left Superior cerebellar peduncle (SCP-L)</option>
-<option value="SCP_right">TractSeg: Right Superior cerebellar peduncle (SCP-R)</option>
-
-<option value="SLF_I_left">TractSeg: Left Superior longitudinal fascicle I (SLF-I-L)</option>
-<option value="SLF_I_right">TractSeg: Right Superior longitudinal fascicle I (SLF-I-R)</option>
-
-<option value="SLF_II_left">TractSeg: Left Superior longitudinal fascicle II (SLF-II-L)</option>
-<option value="SLF_II_right">TractSeg: Right Superior longitudinal fascicle II (SLF-II-R)</option>
-
-<option value="SLF_III_left">TractSeg: Left Superior longitudinal fascicle III (SLF-III-L)</option>
-<option value="SLF_III_right">TractSeg: Right Superior longitudinal fascicle III (SLF-III-R)</option>
-
-<option value="STR_left">TractSeg: Left Superior Thalamic Radiation (STR-L)</option>
-<option value="STR_right">TractSeg: Right Superior Thalamic Radiation (STR-R)</option>
-
-<option value="UF_left">TractSeg: Left Uncinate fascicle (UF-L)</option>
-<option value="UF_right">TractSeg: Right Uncinate fascicle (UF-R)</option>
-
-<option value="CC">TractSeg: Corpus Callosum (CC)</option>
-
-<option value="T_PREF_left">TractSeg: Left Thalamo-prefrontal (T-PREF-L)</option>
-<option value="T_PREF_right">TractSeg: Right Thalamo-prefrontal (T-PREF-R)</option>
-
-<option value="T_PREM_left">TractSeg: Left Thalamo-premotor (T-PREM-L)</option>
-<option value="T_PREM_right">TractSeg: Right Thalamo-premotor (T-PREM-R)</option>
-
-<option value="T_PREC_left">TractSeg: Left Thalamo-precentral (T-PREC-L)</option>
-<option value="T_PREC_right">TractSeg: Right Thalamo-precentral (T-PREC-R)</option>
-
-<option value="T_POSTC_left">TractSeg: Left Thalamo-postcentral (T-POSTC-L)</option>
-<option value="T_POSTC_right">TractSeg: Right Thalamo-postcentral (T-POSTC-R)</option>
-
-<option value="T_PAR_left">TractSeg: Left Thalamo-parietal (T-PAR-L)</option>
-<option value="T_PAR_right">TractSeg: Right Thalamo-parietal (T-PAR-R)</option>
-
-<option value="T_OCC_left">TractSeg: Left Thalamo-occipital (T-OCC-L)</option>
-<option value="T_OCC_right">TractSeg: Right Thalamo-occipital (T-OCC-R)</option>
-
-<option value="ST_FO_left">TractSeg: Left Striato-fronto-orbital (ST-FO-L)</option>
-<option value="ST_FO_right">TractSeg: Right Striato-fronto-orbital (ST-FO-R)</option>
-
-<option value="ST_PREF_left">TractSeg: Left Striato-prefrontal (ST-PREF-L)</option>
-<option value="ST_PREF_right">TractSeg: Right Striato-prefrontal (ST-PREF-R)</option>
-
-<option value="ST_PREM_left">TractSeg: Left Striato-premotor (ST-PREM-L)</option>
-<option value="ST_PREM_right">TractSeg: Right Striato-premotor (ST-PREM-R)</option>
-
-<option value="ST_PREC_left">TractSeg: Left Striato-precentral (ST-PREC-L)</option>
-<option value="ST_PREC_right">TractSeg: Right Striato-precentral (ST-PREC-R)</option>
-
-<option value="ST_POSTC_left">TractSeg: Left Striato-postcentral (ST-POSTC-L)</option>
-<option value="ST_POSTC_right">TractSeg: Right Striato-postcentral (ST-POSTC-R)</option>
-
-<option value="ST_PAR_left">TractSeg: Left Striato-parietal (ST-PAR-L)</option>
-<option value="ST_PAR_right">TractSeg: Right Striato-parietal (ST-PAR-R)</option>
-
-<option value="ST_OCC_left">TractSeg: Left Striato-occipital (ST-OCC-L)</option>
-<option value="ST_OCC_right">TractSeg: Right Striato-occipital (ST-OCC-R)</option>
-
+        <option value="tractseg_AF_left">TractSeg: Left Arcuate fascicle (AF-L)</option>
+        <option value="AF_right">TractSeg: Right Arcuate fascicle (AF-R)</option>
+        <option value="ATR_left">TractSeg: Left Anterior Thalamic Radiation (ATR-L)</option>
+        <option value="ATR_right">TractSeg: Right Anterior Thalamic Radiation (ATR-R)</option>
+        <option value="CA">TractSeg: Commissure Anterior (CA)</option>
+        <option value="CC_1">TractSeg: Rostrum of Corpus Callosum (CC-1)</option>
+        <option value="CC_2">TractSeg: Genu of Corpus Callosum (CC-2)</option>
+        <option value="CC_3">TractSeg: Rostral Body (PreMotor) (CC-3)</option>
+        <option value="CC_4">TractSeg: Anterior Midbody (Primary Motor) (CC-4)</option>
+        <option value="CC_5">TractSeg: Posterior Midbody (Primary Somatosensory) (CC-5)</option>
+        <option value="CC_6">TractSeg: Isthmus (CC-6)</option>
+        <option value="CC_7">TractSeg: Splenium (CC-7)</option>
+        <option value="CG_left">TractSeg: Left Cingulum (CG-L)</option>
+        <option value="CG_right">TractSeg: Right Cingulum (CG-R)</option>
+        <option value="CST_left">TractSeg: Left Corticospinal tract (CST-L)</option>
+        <option value="CST_right">TractSeg: Right Corticospinal tract (CST-R)</option>
+        <option value="MLF_left">TractSeg: Left Middle longitudinal fascicle (MLF-L)</option>
+        <option value="MLF_right">TractSeg: Right Middle longitudinal fascicle (MLF-R)</option>
+        <option value="FPT_left">TractSeg: Left Fronto-pontine tract (FPT-L)</option>
+        <option value="FPT_right">TractSeg: Right Fronto-pontine tract (FPT-R)</option>
+        <option value="FX_left">TractSeg: Left Fornix (FX-L)</option>
+        <option value="FX_right">TractSeg: Right Fornix (FX-R)</option>
+        <option value="ICP_left">TractSeg: Left Inferior cerebellar peduncle (ICP-L)</option>
+        <option value="ICP_right">TractSeg: Right Inferior cerebellar peduncle (ICP-R)</option>
+        <option value="IFO_left">TractSeg: Left Inferior fronto-occipital fascicle (IFO-L)</option>
+        <option value="IFO_right">TractSeg: Right Inferior fronto-occipital fascicle (IFO-R)</option>
+        <option value="ILF_left">TractSeg: Left Inferior longitudinal fascicle (ILF-L)</option>
+        <option value="ILF_right">TractSeg: Right Inferior longitudinal fascicle (ILF-R)</option>
+        <option value="MCP">TractSeg: Middle cerebellar peduncle (MCP)</option>
+        <option value="OR_left">TractSeg: Left Optic radiation (OR-L)</option>
+        <option value="OR_right">TractSeg: Right Optic radiation (OR-R)</option>
+        <option value="POPT_left">TractSeg: Left Parieto-occipital pontine tract (POPT-L)</option>
+        <option value="POPT_right">TractSeg: Right Parieto-occipital pontine tract (POPT-R)</option>
+        <option value="SCP_left">TractSeg: Left Superior cerebellar peduncle (SCP-L)</option>
+        <option value="SCP_right">TractSeg: Right Superior cerebellar peduncle (SCP-R)</option>
+        <option value="SLF_I_left">TractSeg: Left Superior longitudinal fascicle I (SLF-I-L)</option>
+        <option value="SLF_I_right">TractSeg: Right Superior longitudinal fascicle I (SLF-I-R)</option>
+        <option value="SLF_II_left">TractSeg: Left Superior longitudinal fascicle II (SLF-II-L)</option>
+        <option value="SLF_II_right">TractSeg: Right Superior longitudinal fascicle II (SLF-II-R)</option>
+        <option value="SLF_III_left">TractSeg: Left Superior longitudinal fascicle III (SLF-III-L)</option>
+        <option value="SLF_III_right">TractSeg: Right Superior longitudinal fascicle III (SLF-III-R)</option>
+        <option value="STR_left">TractSeg: Left Superior Thalamic Radiation (STR-L)</option>
+        <option value="STR_right">TractSeg: Right Superior Thalamic Radiation (STR-R)</option>
+        <option value="UF_left">TractSeg: Left Uncinate fascicle (UF-L)</option>
+        <option value="UF_right">TractSeg: Right Uncinate fascicle (UF-R)</option>
+        <option value="CC">TractSeg: Corpus Callosum (CC)</option>
+        <option value="T_PREF_left">TractSeg: Left Thalamo-prefrontal (T-PREF-L)</option>
+        <option value="T_PREF_right">TractSeg: Right Thalamo-prefrontal (T-PREF-R)</option>
+        <option value="T_PREM_left">TractSeg: Left Thalamo-premotor (T-PREM-L)</option>
+        <option value="T_PREM_right">TractSeg: Right Thalamo-premotor (T-PREM-R)</option>
+        <option value="T_PREC_left">TractSeg: Left Thalamo-precentral (T-PREC-L)</option>
+        <option value="T_PREC_right">TractSeg: Right Thalamo-precentral (T-PREC-R)</option>
+        <option value="T_POSTC_left">TractSeg: Left Thalamo-postcentral (T-POSTC-L)</option>
+        <option value="T_POSTC_right">TractSeg: Right Thalamo-postcentral (T-POSTC-R)</option>
+        <option value="T_PAR_left">TractSeg: Left Thalamo-parietal (T-PAR-L)</option>
+        <option value="T_PAR_right">TractSeg: Right Thalamo-parietal (T-PAR-R)</option>
+        <option value="T_OCC_left">TractSeg: Left Thalamo-occipital (T-OCC-L)</option>
+        <option value="T_OCC_right">TractSeg: Right Thalamo-occipital (T-OCC-R)</option>
+        <option value="ST_FO_left">TractSeg: Left Striato-fronto-orbital (ST-FO-L)</option>
+        <option value="ST_FO_right">TractSeg: Right Striato-fronto-orbital (ST-FO-R)</option>
+        <option value="ST_PREF_left">TractSeg: Left Striato-prefrontal (ST-PREF-L)</option>
+        <option value="ST_PREF_right">TractSeg: Right Striato-prefrontal (ST-PREF-R)</option>
+        <option value="ST_PREM_left">TractSeg: Left Striato-premotor (ST-PREM-L)</option>
+        <option value="ST_PREM_right">TractSeg: Right Striato-premotor (ST-PREM-R)</option>
+        <option value="ST_PREC_left">TractSeg: Left Striato-precentral (ST-PREC-L)</option>
+        <option value="ST_PREC_right">TractSeg: Right Striato-precentral (ST-PREC-R)</option>
+        <option value="ST_POSTC_left">TractSeg: Left Striato-postcentral (ST-POSTC-L)</option>
+        <option value="ST_POSTC_right">TractSeg: Right Striato-postcentral (ST-POSTC-R)</option>
+        <option value="ST_PAR_left">TractSeg: Left Striato-parietal (ST-PAR-L)</option>
+        <option value="ST_PAR_right">TractSeg: Right Striato-parietal (ST-PAR-R)</option>
+        <option value="ST_OCC_left">TractSeg: Left Striato-occipital (ST-OCC-L)</option>
+        <option value="ST_OCC_right">TractSeg: Right Striato-occipital (ST-OCC-R)</option>
       </optgroup>
     </select>
 
@@ -253,59 +231,86 @@ function getSelected(id) {
   return Array.from(document.getElementById(id).selectedOptions).map(o=>o.value);
 }
 
-async function loadJSON(metricLabel, roiLabel) {
-  const metric = metricMap[metricLabel];
-  const roi = roiMap[roiLabel];
-  if (!metric || !roi) {
-    console.warn(`Sem mapeamento para ${metricLabel} / ${roiLabel}`);
-    return null;
-  }
+async function loadJSON(metric, roi) {
 
-  const key = `${metric}_${roi}`;
-  if (cache[key]) return cache[key];
+  const file = `gamlss/gamlss_gpdwis_PA_geomcorr_${roi}_gpdwis_PA_${metric}_median-PatientAge-_TF_fp.json`;
 
-  const file = `gamlss/gamlss_GA_${roi}_e1_gpdwis_PA_${metric}_median.json`;
-
+  console.info("JSON", file);
   try {
-    const response = await fetch(file);
-    if (!response.ok) throw new Error('Arquivo não encontrado');
-    const data = await response.json();
-    cache[key] = data;
-    return data;
+    const res = await fetch(file);
+    if (!res.ok) throw new Error('not found');
+    return await res.json();
   } catch (err) {
-    console.warn(`Falha ao carregar ${file}`, err);
+    console.warn("Erro carregando", file);
     return null;
   }
 }
+
+function getSelected(id) {
+  return [...document.getElementById(id).selectedOptions].map(o=>o.value);
+}
+
 
 async function plotGraph() {
-  const metrics = getSelected('metricas');
-  const rois = getSelected('rois');
-  const traces = [];
+    const metrics = getSelected("metricas");
+    const rois = getSelected("rois");
 
-  for (const m of metrics) {
-    for (const r of rois) {
-      const data = await loadJSON(m, r);
-      if (data) {
-        traces.push({
-          x: data.age || data.x || [],
-          y: data.value || data.y || [],
-          mode: 'lines',
-          name: `${r} - ${m}`,
-          line: {width: 2}
-        });
-      }
+    const traces = [];
+
+    for (const m of metrics) {
+        for (const r of rois) {
+            const data = await loadJSON(m, r);
+            if (!data) continue;
+
+            const preds = data.predictions;
+            const cents = preds.percentis;
+
+            if (!cents || cents.length === 0) continue;
+
+            // Extrai arrays separados
+            const x = cents.map(d => d.x);
+            const p2_5 = cents.map(d => d["p2.5"]);
+            const p25 = cents.map(d => d.p25);
+            const p50 = cents.map(d => d.p50);
+            const p75 = cents.map(d => d.p75);
+            const p97_5 = cents.map(d => d["p97.5"]);
+
+            // Mediana (p50)
+            traces.push({
+                x: x,
+                y: p50,
+                mode: "lines",
+                name: `${r} - ${m} (p50)`,
+                line: { width: 3, color: "#000" }
+            });
+
+            // Percentis – estilo leve
+            [
+                ["p2.5", p2_5],
+                ["p25", p25],
+                ["p75", p75],
+                ["p97.5", p97_5]
+            ].forEach(([label, arr]) => {
+                traces.push({
+                    x: x,
+                    y: arr,
+                    mode: "lines",
+                    name: `${r} - ${m} (${label})`,
+                    line: { width: 2, dash: "dot" }
+                });
+            });
+        }
     }
-  }
 
-  Plotly.newPlot('graph', traces, {
-    margin: {t:40, l:50, r:10, b:50},
-    height: 600,
-    xaxis: {title: 'Age'},
-    yaxis: {title: 'Metric'},
-    showlegend: true
-  });
+    Plotly.newPlot("graph", traces, {
+        height: 650,
+        margin: { t: 40, b: 60, l: 60 },
+        xaxis: { title: "Age" },
+        yaxis: { title: "Metric Value" },
+        showlegend: true,
+    });
 }
+
 
 document.getElementById('metricas').addEventListener('change', plotGraph);
 document.getElementById('rois').addEventListener('change', plotGraph);
