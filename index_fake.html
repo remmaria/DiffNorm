@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>7TBRP Diffusion MRI Normative Charts</title>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; background:#f5f6fa; color:#333; }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* mantém espaço entre os itens */
+    background:#2c3e50; 
+    color:white; 
+    padding:15px 20px; 
+    font-size:24px; 
+    font-weight:bold;
+    height: 70px; /* define altura fixa */
+  }
+
+  header span {
+    flex: 1;
+    text-align: center; /* centraliza o título */
+  }
+  
+  .logo-left, .logo-right {
+    height: 60px; /* ajusta o tamanho dos logos */
+  }
+  .container { display:flex; flex-wrap:wrap; gap:20px; padding:20px; justify-content:center; align-items:flex-start; }
+
+  select { width:100%; }
+
+  /* Botão de adicionar curva */
+  #openCurve { width:100%; padding:6px; margin:10px 0; border-radius:5px; border:none; background:#2c3e50; color:white; font-weight:bold; cursor:pointer; }
+  #openCurve:hover { background:#1a2a38; }
+
+  /* Coluna direita: gráfico */
+  .graph-container { flex:1 1 600px; min-width:400px; height:100vh; }
+
+  /* Modal */
+  .modal { display: none; position: fixed; z-index: 100; padding-top: 60px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+  .modal-content { background-color: #fff; margin: auto; padding: 20px; border-radius:8px; width: 300px; box-shadow:0 2px 5px rgba(0,0,0,0.3); }
+  .close { color: #aaa; float: right; font-size: 22px; cursor: pointer; }
+  .close:hover { color: black; }
+  .modal input, .modal button { width:100%; margin:5px 0; padding:6px; border-radius:5px; border:1px solid #ccc; }
+  .modal button { background:#2c3e50; color:white; font-weight:bold; cursor:pointer; }
+  .modal button:hover { background:#1a2a38; }
+
+  @media(max-width:1000px) {
+    .container { flex-direction:column; align-items:center; }
+    .graph-container { width:95%; height:60vh; }
+    .panel { width:90%; max-height:none; margin-bottom:10px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <img src="assets/logo_Pitt_neg.png" class="logo-left">
+  <span>7TBRP Diffusion MRI Normative Charts</span>
+  <img src="assets/logo_USP_EESC_neg.png" class="logo-right">
+</header>
+
+
+<div class="container">
+  <!-- Coluna esquerda: Metrics + ROIs -->
+  <div class="panel">
+    <select id="metricas" multiple size="10">
+      <optgroup label="Metrics">
+        <option value="DTI-Fractional Anisotropy (FA)" selected>DTI-Fractional Anisotropy (FA)</option>
+        <option value="DTI-Axial Diffusivity (AD)">DTI-Axial Diffusivity (AD)</option>
+        <option value="DTI-Mean Diffusivity (MD)">DTI-Mean Diffusivity (MD)</option>
+        <option value="DTI-Radial Diffusivity (RD)">DTI-Radial Diffusivity (RD)</option>
+        <option value="DKI-Axial Kurtosis (AK)">DKI-Axial Kurtosis (AK)</option>
+        <option value="DKI-Mean Kurtosis (MK)">DKI-Mean Kurtosis (MK)</option>
+        <option value="DKI-Radial Kurtosis (RK)">DKI-Radial Kurtosis (RK)</option>
+        <option value="NODDI-Orientation Dispersion Index (ODI)">NODDI-Orientation Dispersion Index (ODI)</option>
+        <option value="NODDI-Neurite Density Index (NDI)">NODDI-Neurite Density Index (NDI)</option>
+        <option value="NODDI-Free Water Fraction (FWF)">NODDI-Free Water Fraction (FWF)</option>
+      </optgroup>
+    </select>
+
+    <select id="rois" multiple size="20" >
+      <optgroup label="ROIs">
+        <option value="AF-L: Arcuate fascicle (L)">AF-L: Arcuate fascicle (L)</option>
+        <option value="AF-R: Arcuate fascicle (R)">AF-R: Arcuate fascicle (R)</option>
+        <option value="ATR-L: Anterior Thalamic Radiation (L)">ATR-L: Anterior Thalamic Radiation (L)</option>
+        <option value="ATR-R: Anterior Thalamic Radiation (R)">ATR-R: Anterior Thalamic Radiation (R)</option>
+        <option value="CA: Commissure Anterior">CA: Commissure Anterior</option>
+        <option value="CC-1: Rostrum">CC-1: Rostrum</option>
+        <option value="CC-2: Genu">CC-2: Genu</option>
+        <option value="CC-3: Rostral Body (PreMotor)">CC-3: Rostral Body (PreMotor)</option>
+        <option value="CC-4: Anterior midbody (Primary Motor)">CC-4: Anterior midbody (Primary Motor)</option>
+        <option value="CC-5: Posterior midbody (Primary Somatosensory)">CC-5: Posterior midbody (Primary Somatosensory)</option>
+        <option value="CC-6: Isthmus">CC-6: Isthmus</option>
+        <option value="CC-7: Splenium">CC-7: Splenium</option>
+        <option value="CG-L: Cingulum (L)">CG-L: Cingulum (L)</option>
+        <option value="CG-R: Cingulum (R)">CG-R: Cingulum (R)</option>
+        <option value="CST-L: Corticospinal tract (L)">CST-L: Corticospinal tract (L)</option>
+        <option value="CST-R: Corticospinal tract (R)">CST-R: Corticospinal tract (R)</option>
+        <option value="MLF-L: Middle longitudinal fascicle (L)">MLF-L: Middle longitudinal fascicle (L)</option>
+        <option value="MLF-R: Middle longitudinal fascicle (R)">MLF-R: Middle longitudinal fascicle (R)</option>
+        <option value="FPT-L: Fronto-pontine tract (L)">FPT-L: Fronto-pontine tract (L)</option>
+        <option value="FPT-R: Fronto-pontine tract (R)">FPT-R: Fronto-pontine tract (R)</option>
+        <option value="FX-L: Fornix (L)">FX-L: Fornix (L)</option>
+        <option value="FX-R: Fornix (R)">FX-R: Fornix (R)</option>
+        <option value="ICP-L: Inferior cerebellar peduncle (L)">ICP-L: Inferior cerebellar peduncle (L)</option>
+        <option value="ICP-R: Inferior cerebellar peduncle (R)">ICP-R: Inferior cerebellar peduncle (R)</option>
+        <option value="IFO-L: Inferior occipito-frontal fascicle (L)">IFO-L: Inferior occipito-frontal fascicle (L)</option>
+        <option value="IFO-R: Inferior occipito-frontal fascicle (R)">IFO-R: Inferior occipito-frontal fascicle (R)</option>
+        <option value="ILF-L: Inferior longitudinal fascicle (L)">ILF-L: Inferior longitudinal fascicle (L)</option>
+        <option value="ILF-R: Inferior longitudinal fascicle (R)">ILF-R: Inferior longitudinal fascicle (R)</option>
+        <option value="MCP: Middle cerebellar peduncle">MCP: Middle cerebellar peduncle</option>
+        <option value="OR-L: Optic radiation (L)">OR-L: Optic radiation (L)</option>
+        <option value="OR-R: Optic radiation (R)">OR-R: Optic radiation (R)</option>
+        <option value="POPT-L: Parieto‐occipital pontine (L)">POPT-L: Parieto‐occipital pontine (L)</option>
+        <option value="POPT-R: Parieto‐occipital pontine (R)">POPT-R: Parieto‐occipital pontine (R)</option>
+        <option value="SCP-L: Superior cerebellar peduncle (L)">SCP-L: Superior cerebellar peduncle (L)</option>
+        <option value="SCP-R: Superior cerebellar peduncle (R)">SCP-R: Superior cerebellar peduncle (R)</option>
+        <option value="SLF-I-L: Superior longitudinal fascicle I (L)">SLF-I-L: Superior longitudinal fascicle I (L)</option>
+        <option value="SLF-I-R: Superior longitudinal fascicle I (R)">SLF-I-R: Superior longitudinal fascicle I (R)</option>
+        <option value="SLF-II-L: Superior longitudinal fascicle II (L)">SLF-II-L: Superior longitudinal fascicle II (L)</option>
+        <option value="SLF-II-R: Superior longitudinal fascicle II (R)">SLF-II-R: Superior longitudinal fascicle II (R)</option>
+        <option value="SLF-III-L: Superior longitudinal fascicle III (L)">SLF-III-L: Superior longitudinal fascicle III (L)</option>
+        <option value="SLF-III-R: Superior longitudinal fascicle III (R)">SLF-III-R: Superior longitudinal fascicle III (R)</option>
+        <option value="STR-L: Superior Thalamic Radiation (L)">STR-L: Superior Thalamic Radiation (L)</option>
+        <option value="STR-R: Superior Thalamic Radiation (R)">STR-R: Superior Thalamic Radiation (R)</option>
+        <option value="UF-L: Uncinate fascicle (L)">UF-L: Uncinate fascicle (L)</option>
+        <option value="UF-R: Uncinate fascicle (R)">UF-R: Uncinate fascicle (R)</option>
+        <option value="CC: Corpus Callosum">CC: Corpus Callosum</option>
+        <option value="T_PREF-L: Thalamo-prefrontal (L)">T_PREF-L: Thalamo-prefrontal (L)</option>
+        <option value="T_PREF-R: Thalamo-prefrontal (R)">T_PREF-R: Thalamo-prefrontal (R)</option>
+        <option value="T_PREM-L: Thalamo-premotor (L)">T_PREM-L: Thalamo-premotor (L)</option>
+        <option value="T_PREM-R:Thalamo-premotor (R)">T_PREM-R:Thalamo-premotor (R)</option>
+        <option value="T_PREC-L: Thalamo-precentral (L)">T_PREC-L: Thalamo-precentral (L)</option>
+        <option value="T_PREC-R: Thalamo-precentral (R)">T_PREC-R: Thalamo-precentral (R)</option>
+        <option value="T_POSTC-L: Thalamo-postcentral (L)">T_POSTC-L: Thalamo-postcentral (L)</option>
+        <option value="T_POSTC-R: Thalamo-postcentral (R)">T_POSTC-R: Thalamo-postcentral (R)</option>
+        <option value="T-PAR-L: Thalamo-parietal (L)">T-PAR-L: Thalamo-parietal (L)</option>
+        <option value="T-PAR-R: Thalamo-parietal (R)">T-PAR-R: Thalamo-parietal (R)</option>
+        <option value="T-OCC-L: Thalamo-occipital (L)">T-OCC-L: Thalamo-occipital (L)</option>
+        <option value="T-OCC-R: Thalamo-occipital (R)">T-OCC-R: Thalamo-occipital (R)</option>
+        <option value="ST-FO-L: Striato-fronto-orbital (L)">ST-FO-L: Striato-fronto-orbital (L)</option>
+        <option value="ST-FO-R: Striato-fronto-orbital (R)">ST-FO-R: Striato-fronto-orbital (R)</option>
+        <option value="ST-PREF-L: Striato-prefrontal (L)">ST-PREF-L: Striato-prefrontal (L)</option>
+        <option value="ST-PREF-R: Striato-prefrontal (R)">ST-PREF-R: Striato-prefrontal (R)</option>
+        <option value="ST-PREM-L: Striato-premotor (L)">ST-PREM-L: Striato-premotor (L)</option>
+        <option value="ST-PREM-R: Striato-premotor (R)">ST-PREM-R: Striato-premotor (R)</option>
+        <option value="ST-PREC-L: Striato-precentral (L)">ST-PREC-L: Striato-precentral (L)</option>
+        <option value="ST-PREC-R: Striato-precentral (R)">ST-PREC-R: Striato-precentral (R)</option>
+        <option value="ST-POSTC-L: Striato-postcentral (L)">ST-POSTC-L: Striato-postcentral (L)</option>
+        <option value="ST-POSTC-R: Striato-postcentral (R)">ST-POSTC-R: Striato-postcentral (R)</option>
+        <option value="ST-PAR-L: Striato-parietal (L)">ST-PAR-L: Striato-parietal (L)</option>
+        <option value="ST-PAR-R:Striato-parietal (R)">ST-PAR-R:Striato-parietal (R)</option>
+        <option value="ST-OCC-L:Striato-occipital (L)">ST-OCC-L:Striato-occipital (L)</option>
+        <option value="ST-OCC-R:Striato-occipital (R)">ST-OCC-R:Striato-occipital (R)</option>
+      </optgroup>
+    </select>
+
+    <!-- Botão para abrir modal -->
+    <button id="openCurve">Add User Curve</button>
+  </div>
+
+  <!-- Coluna direita: gráfico -->
+  <div class="graph-container" id="graph"></div>
+</div>
+
+<!-- Modal -->
+<div id="curveModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h4>Add User Curve</h4>
+    <label>X (comma separated):</label>
+    <input type="text" id="xvalues" placeholder="ex: 0,10,20,30">
+    <label>Y (comma separated):</label>
+    <input type="text" id="yvalues" placeholder="ex: 0.5,0.6,0.7,0.8">
+    <label>Curve name:</label>
+    <input type="text" id="curveName" placeholder="Minha Curva">
+    <button onclick="addCustomCurve()">Adicionar curva</button>
+  </div>
+</div>
+
+<script>
+function getSelected(id) {
+  return Array.from(document.getElementById(id).selectedOptions).map(o=>o.value);
+}
+
+function plotGraph() {
+  const metrics = getSelected('metricas');
+  const rois = getSelected('rois');
+  const traces = [];
+  const x = [0,10,20,30,40,50];
+
+  metrics.forEach(m=>{
+    rois.forEach(r=>{
+      const y = x.map(()=>Math.random()*0.2 + 0.4);
+      traces.push({x, y, mode:'lines', name:`${r} - ${m}`, line:{width:2}});
+    });
+  });
+
+  Plotly.newPlot('graph', traces, {margin:{t:40,l:50,r:10,b:50}, height:600, xaxis:{title:'Age'}, yaxis:{title:'Metric'}, showlegend:true});
+}
+
+document.getElementById('metricas').addEventListener('change', plotGraph);
+document.getElementById('rois').addEventListener('change', plotGraph);
+
+// Modal JS
+const modal = document.getElementById('curveModal');
+const btn = document.getElementById('openCurve');
+const span = document.querySelector('.close');
+
+btn.onclick = () => modal.style.display = 'block';
+span.onclick = () => modal.style.display = 'none';
+window.onclick = e => { if(e.target == modal) modal.style.display='none'; }
+
+function addCustomCurve() {
+  const x = document.getElementById('xvalues').value.split(',').map(Number);
+  const y = document.getElementById('yvalues').value.split(',').map(Number);
+  const name = document.getElementById('curveName').value || 'Curva personalizada';
+  if(x.length !== y.length || x.some(isNaN) || y.some(isNaN)){ alert('Valores inválidos'); return; }
+  Plotly.addTraces('graph',{x,y,mode:'lines+markers',name:name,line:{color:'black',dash:'dot',width:2},marker:{symbol:'square',size:8,color:'black'}});
+  modal.style.display = 'none'; // fecha modal
+}
+
+plotGraph();
+</script>
+</body>
+</html>
