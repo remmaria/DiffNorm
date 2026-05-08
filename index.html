@@ -3,327 +3,356 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>7TBRP Diffusion MRI Normative Charts</title>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<style>
-  body { font-family: Arial, sans-serif; margin:0; background:#f5f6fa; color:#333; }
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* mantém espaço entre os itens */
-    background:#2c3e50; 
-    color:white; 
-    padding:15px 20px; 
-    font-size:24px; 
-    font-weight:bold;
-    height: 70px; /* define altura fixa */
-  }
 
-  header span {
-    flex: 1;
-    text-align: center; /* centraliza o título */
-  }
-  
-  .logo-left, .logo-right {
-    height: 60px; /* ajusta o tamanho dos logos */
-  }
-  .container { display:flex; flex-wrap:wrap; gap:20px; padding:20px; justify-content:center; align-items:flex-start; }
-.panel {
-  width: 420px;           /* ou 250px, 300px… o que quiser */
-  flex: 0 0 420px;        /* impede expandir e garante largura fixa */
-  background: #fff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+<title>7TBRP Diffusion MRI Normative Charts</title>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    background:#f5f6fa;
+    color:#333;
 }
 
-  select { width:100%; }
+header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#2c3e50;
+    color:white;
+    padding:15px 20px;
+    height:70px;
+}
 
-  /* Botão de adicionar curva */
-  #openCurve { width:100%; padding:6px; margin:10px 0; border-radius:5px; border:none; background:#2c3e50; color:white; font-weight:bold; cursor:pointer; }
-  #openCurve:hover { background:#1a2a38; }
+header span{
+    flex:1;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
 
-  /* Coluna direita: gráfico */
-  .graph-container { flex:1 1 600px; min-width:400px; height:100vh; }
+.logo-left,
+.logo-right{
+    height:60px;
+}
 
-  /* Modal */
-  .modal { display: none; position: fixed; z-index: 100; padding-top: 60px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
-  .modal-content { background-color: #fff; margin: auto; padding: 20px; border-radius:8px; width: 300px; box-shadow:0 2px 5px rgba(0,0,0,0.3); }
-  .close { color: #aaa; float: right; font-size: 22px; cursor: pointer; }
-  .close:hover { color: black; }
-  .modal input, .modal button { width:100%; margin:5px 0; padding:6px; border-radius:5px; border:1px solid #ccc; }
-  .modal button { background:#2c3e50; color:white; font-weight:bold; cursor:pointer; }
-  .modal button:hover { background:#1a2a38; }
+.container{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    padding:20px;
+}
 
-  @media(max-width:1000px) {
-    .container { flex-direction:column; align-items:center; }
-    .graph-container { width:95%; height:60vh; }
-    .panel { width:90%; max-height:none; margin-bottom:10px; }
-  }
+.panel{
+    width:420px;
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.graph-container{
+    flex:1;
+    min-width:700px;
+    background:white;
+    border-radius:10px;
+    padding:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+select{
+    width:100%;
+    margin-bottom:15px;
+    padding:5px;
+}
+
+button{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    background:#2c3e50;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1a252f;
+}
+
+#graph{
+    width:100%;
+    height:90vh;
+}
+
 </style>
 </head>
+
 <body>
+
 <header>
-  <img src="assets/logo_Pitt_neg.png" class="logo-left">
-  <span>7TBRP Diffusion MRI Normative Charts</span>
-  <img src="assets/logo_USP_EESC_neg.png" class="logo-right">
+    <img src="assets/logo_Pitt_neg.png" class="logo-left">
+
+    <span>7TBRP Diffusion MRI Normative Charts</span>
+
+    <img src="assets/logo_USP_EESC_neg.png" class="logo-right">
 </header>
 
-
 <div class="container">
-  <!-- Coluna esquerda: Metrics + ROIs -->
-  <div class="panel">
 
-    <select id="gender" multiple size="4">
-      <optgroup label="Gender">
-        <option value="" selected>None</option>
-        <option value="F">Female</option>
-        <option value="M">Male</option>
-      </optgroup>     
-    </select>
+    <div class="panel">
 
-    <select id="metricas" multiple size="13">
-      <optgroup label="Metrics - DTI">
-        <option value="dti_fa" selected>DTI-Fractional Anisotropy (FA)</option>
-        <option value="dti_ad">DTI-Axial Diffusivity (AD)</option>
-        <option value="dti_md">DTI-Mean Diffusivity (MD)</option>
-        <option value="dti_rd">DTI-Radial Diffusivity (RD)</option>
-      </optgroup>
-      <optgroup label="Metrics - DKI">
-        <option value="dki_ak">DKI-Axial Kurtosis (AK)</option>
-        <option value="dki_mk">DKI-Mean Kurtosis (MK)</option>
-        <option value="dki_rk">DKI-Radial Kurtosis (RK)</option>
-      </optgroup>
-      <optgroup label="Metrics - NODDI">
-        <option value="noddi_odi">NODDI-Orientation Dispersion Index (ODI)</option>
-        <option value="noddi_ndi">NODDI-Neurite Density Index (NDI)</option>
-        <option value="noddi_fwf">NODDI-Free Water Fraction (FWF)</option>
-      </optgroup>
-    </select>
+        <!-- GENDER -->
+        <label><b>Gender</b></label>
 
-    <select id="rois" multiple size="20" >
-      <optgroup label="ROIs - Global">
-        <option value="mask3d_e1">Brain</option>
-      </optgroup>
-      <optgroup label="ROIs - SynthSeg">
-        <option value="maskseg_CbWM_e1_e1">SynthSeg: Cerebral White Matter</option>
-        <option value="maskseg_CbllWM_e1_e1">SynthSeg: Cerebellar White Matter</option>
-        <option value="maskseg_Ctx_e1">SynthSeg: Cerebral Cortical</option>
-        <option value="maskseg_SubCtx_e1">SynthSeg: Cerebral SubCortical</option>
-        <option value="maskseg_Hipp_e1_e1">SynthSeg: Hippocampus</option>
-      <optgroup label="ROIs - JHU White Matter Atlas">
-        <option value="jhu_labels_">AF-L: Arcuate fascicle (L)</option>
-      </optgroup>
-      <optgroup label="ROIs - TractSeg">
-        <option value="tractseg_AF_left">TractSeg: Left Arcuate fascicle (AF-L)</option>
-        <option value="AF_right">TractSeg: Right Arcuate fascicle (AF-R)</option>
-        <option value="ATR_left">TractSeg: Left Anterior Thalamic Radiation (ATR-L)</option>
-        <option value="ATR_right">TractSeg: Right Anterior Thalamic Radiation (ATR-R)</option>
-        <option value="CA">TractSeg: Commissure Anterior (CA)</option>
-        <option value="CC_1">TractSeg: Rostrum of Corpus Callosum (CC-1)</option>
-        <option value="CC_2">TractSeg: Genu of Corpus Callosum (CC-2)</option>
-        <option value="CC_3">TractSeg: Rostral Body (PreMotor) (CC-3)</option>
-        <option value="CC_4">TractSeg: Anterior Midbody (Primary Motor) (CC-4)</option>
-        <option value="CC_5">TractSeg: Posterior Midbody (Primary Somatosensory) (CC-5)</option>
-        <option value="CC_6">TractSeg: Isthmus (CC-6)</option>
-        <option value="CC_7">TractSeg: Splenium (CC-7)</option>
-        <option value="CG_left">TractSeg: Left Cingulum (CG-L)</option>
-        <option value="CG_right">TractSeg: Right Cingulum (CG-R)</option>
-        <option value="CST_left">TractSeg: Left Corticospinal tract (CST-L)</option>
-        <option value="CST_right">TractSeg: Right Corticospinal tract (CST-R)</option>
-        <option value="MLF_left">TractSeg: Left Middle longitudinal fascicle (MLF-L)</option>
-        <option value="MLF_right">TractSeg: Right Middle longitudinal fascicle (MLF-R)</option>
-        <option value="FPT_left">TractSeg: Left Fronto-pontine tract (FPT-L)</option>
-        <option value="FPT_right">TractSeg: Right Fronto-pontine tract (FPT-R)</option>
-        <option value="FX_left">TractSeg: Left Fornix (FX-L)</option>
-        <option value="FX_right">TractSeg: Right Fornix (FX-R)</option>
-        <option value="ICP_left">TractSeg: Left Inferior cerebellar peduncle (ICP-L)</option>
-        <option value="ICP_right">TractSeg: Right Inferior cerebellar peduncle (ICP-R)</option>
-        <option value="IFO_left">TractSeg: Left Inferior fronto-occipital fascicle (IFO-L)</option>
-        <option value="IFO_right">TractSeg: Right Inferior fronto-occipital fascicle (IFO-R)</option>
-        <option value="ILF_left">TractSeg: Left Inferior longitudinal fascicle (ILF-L)</option>
-        <option value="ILF_right">TractSeg: Right Inferior longitudinal fascicle (ILF-R)</option>
-        <option value="MCP">TractSeg: Middle cerebellar peduncle (MCP)</option>
-        <option value="OR_left">TractSeg: Left Optic radiation (OR-L)</option>
-        <option value="OR_right">TractSeg: Right Optic radiation (OR-R)</option>
-        <option value="POPT_left">TractSeg: Left Parieto-occipital pontine tract (POPT-L)</option>
-        <option value="POPT_right">TractSeg: Right Parieto-occipital pontine tract (POPT-R)</option>
-        <option value="SCP_left">TractSeg: Left Superior cerebellar peduncle (SCP-L)</option>
-        <option value="SCP_right">TractSeg: Right Superior cerebellar peduncle (SCP-R)</option>
-        <option value="SLF_I_left">TractSeg: Left Superior longitudinal fascicle I (SLF-I-L)</option>
-        <option value="SLF_I_right">TractSeg: Right Superior longitudinal fascicle I (SLF-I-R)</option>
-        <option value="SLF_II_left">TractSeg: Left Superior longitudinal fascicle II (SLF-II-L)</option>
-        <option value="SLF_II_right">TractSeg: Right Superior longitudinal fascicle II (SLF-II-R)</option>
-        <option value="SLF_III_left">TractSeg: Left Superior longitudinal fascicle III (SLF-III-L)</option>
-        <option value="SLF_III_right">TractSeg: Right Superior longitudinal fascicle III (SLF-III-R)</option>
-        <option value="STR_left">TractSeg: Left Superior Thalamic Radiation (STR-L)</option>
-        <option value="STR_right">TractSeg: Right Superior Thalamic Radiation (STR-R)</option>
-        <option value="UF_left">TractSeg: Left Uncinate fascicle (UF-L)</option>
-        <option value="UF_right">TractSeg: Right Uncinate fascicle (UF-R)</option>
-        <option value="CC">TractSeg: Corpus Callosum (CC)</option>
-        <option value="T_PREF_left">TractSeg: Left Thalamo-prefrontal (T-PREF-L)</option>
-        <option value="T_PREF_right">TractSeg: Right Thalamo-prefrontal (T-PREF-R)</option>
-        <option value="T_PREM_left">TractSeg: Left Thalamo-premotor (T-PREM-L)</option>
-        <option value="T_PREM_right">TractSeg: Right Thalamo-premotor (T-PREM-R)</option>
-        <option value="T_PREC_left">TractSeg: Left Thalamo-precentral (T-PREC-L)</option>
-        <option value="T_PREC_right">TractSeg: Right Thalamo-precentral (T-PREC-R)</option>
-        <option value="T_POSTC_left">TractSeg: Left Thalamo-postcentral (T-POSTC-L)</option>
-        <option value="T_POSTC_right">TractSeg: Right Thalamo-postcentral (T-POSTC-R)</option>
-        <option value="T_PAR_left">TractSeg: Left Thalamo-parietal (T-PAR-L)</option>
-        <option value="T_PAR_right">TractSeg: Right Thalamo-parietal (T-PAR-R)</option>
-        <option value="T_OCC_left">TractSeg: Left Thalamo-occipital (T-OCC-L)</option>
-        <option value="T_OCC_right">TractSeg: Right Thalamo-occipital (T-OCC-R)</option>
-        <option value="ST_FO_left">TractSeg: Left Striato-fronto-orbital (ST-FO-L)</option>
-        <option value="ST_FO_right">TractSeg: Right Striato-fronto-orbital (ST-FO-R)</option>
-        <option value="ST_PREF_left">TractSeg: Left Striato-prefrontal (ST-PREF-L)</option>
-        <option value="ST_PREF_right">TractSeg: Right Striato-prefrontal (ST-PREF-R)</option>
-        <option value="ST_PREM_left">TractSeg: Left Striato-premotor (ST-PREM-L)</option>
-        <option value="ST_PREM_right">TractSeg: Right Striato-premotor (ST-PREM-R)</option>
-        <option value="ST_PREC_left">TractSeg: Left Striato-precentral (ST-PREC-L)</option>
-        <option value="ST_PREC_right">TractSeg: Right Striato-precentral (ST-PREC-R)</option>
-        <option value="ST_POSTC_left">TractSeg: Left Striato-postcentral (ST-POSTC-L)</option>
-        <option value="ST_POSTC_right">TractSeg: Right Striato-postcentral (ST-POSTC-R)</option>
-        <option value="ST_PAR_left">TractSeg: Left Striato-parietal (ST-PAR-L)</option>
-        <option value="ST_PAR_right">TractSeg: Right Striato-parietal (ST-PAR-R)</option>
-        <option value="ST_OCC_left">TractSeg: Left Striato-occipital (ST-OCC-L)</option>
-        <option value="ST_OCC_right">TractSeg: Right Striato-occipital (ST-OCC-R)</option>
-      </optgroup>
-    </select>
+        <select id="gender">
 
-    <!-- Botão para abrir modal -->
-    <button id="openCurve">Add User Curve</button>
-  </div>
+            <option value="F" selected>Female</option>
+            <option value="M">Male</option>
 
-  <!-- Coluna direita: gráfico -->
-  <div class="graph-container" id="graph"></div>
-</div>
+        </select>
 
-<!-- Modal -->
-<div id="curveModal" class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h4>Add User Curve</h4>
-    <label>X (comma separated):</label>
-    <input type="text" id="xvalues" placeholder="ex: 0,10,20,30">
-    <label>Y (comma separated):</label>
-    <input type="text" id="yvalues" placeholder="ex: 0.5,0.6,0.7,0.8">
-    <label>Curve name:</label>
-    <input type="text" id="curveName" placeholder="Minha Curva">
-    <button onclick="addCustomCurve()">Adicionar curva</button>
-  </div>
+        <!-- METRICS -->
+        <label><b>Metric</b></label>
+
+        <select id="metricas">
+
+            <optgroup label="DTI">
+                <option value="dti_fa">DTI-FA</option>
+                <option value="dti_ad">DTI-AD</option>
+                <option value="dti_md">DTI-MD</option>
+                <option value="dti_rd">DTI-RD</option>
+            </optgroup>
+
+            <optgroup label="DKI">
+                <option value="dki_ak" selected>DKI-AK</option>
+                <option value="dki_mk">DKI-MK</option>
+                <option value="dki_rk">DKI-RK</option>
+            </optgroup>
+
+            <optgroup label="NODDI">
+                <option value="noddi_odi">NODDI-ODI</option>
+                <option value="noddi_ndi">NODDI-NDI</option>
+                <option value="noddi_fwf">NODDI-FWF</option>
+            </optgroup>
+
+        </select>
+
+        <!-- ROI -->
+        <label><b>ROI</b></label>
+
+        <select id="rois">
+
+            <option value="mask3d_e1" selected>
+                Brain
+            </option>
+
+            <option value="tractseg_AF_left">
+                TractSeg AF Left
+            </option>
+
+        </select>
+
+        <button onclick="plotSelectedCurve()">
+            Plot Curve
+        </button>
+
+    </div>
+
+    <div class="graph-container">
+
+        <div id="graph"></div>
+
+    </div>
+
 </div>
 
 <script>
-const cache = {};
 
-// mapeamento entre os nomes do select e os nomes internos dos arquivos
+//////////////////////////////////////////////////////////
+// MAPS
+//////////////////////////////////////////////////////////
+
 const metricMap = {
-  "DTI-Fractional Anisotropy (FA)": "dti_fa",
-  "DTI-Axial Diffusivity (AD)": "dti_ad",
-  "DTI-Mean Diffusivity (MD)": "dti_md",
-  "DTI-Radial Diffusivity (RD)": "dti_rd",
-  "DKI-Axial Kurtosis (AK)": "dki_ak",
-  "DKI-Mean Kurtosis (MK)": "dki_mk",
-  "DKI-Radial Kurtosis (RK)": "dki_rk",
-  "NODDI-Orientation Dispersion Index (ODI)": "noddi_odi",
-  "NODDI-Neurite Density Index (NDI)": "noddi_ndi",
-  "NODDI-Free Water Fraction (FWF)": "noddi_fwf"
+
+    dki_ak: 'bgpdwis_PA_dki_ak_median',
+    dki_mk: 'bgpdwis_PA_dki_mk_median',
+    dki_rk: 'bgpdwis_PA_dki_rk_median',
+
+    dti_fa: 'bgpdwis_PA_dti_fa_median',
+    dti_ad: 'bgpdwis_PA_dti_ad_median',
+    dti_md: 'bgpdwis_PA_dti_md_median',
+    dti_rd: 'bgpdwis_PA_dti_rd_median',
+
+    noddi_odi: 'bgpdwis_PA_noddi_odi_median',
+    noddi_ndi: 'bgpdwis_PA_noddi_ndi_median',
+    noddi_fwf: 'bgpdwis_PA_noddi_fwf_median'
 };
 
-// mapeamento entre nomes das ROIs do select e nomes dos arquivos
 const roiMap = {
-  "CC-7: Splenium": "JHU_labels_warped_CC_Splenium",
-  // adiciona outras conforme for colocando na lista
+
+    mask3d_e1: 'bgpdwis_PA_geomcorr_mask3d_e1',
+
+    tractseg_AF_left: 'tractseg_AF_left'
 };
 
-function getSelected(id) {
-  return Array.from(document.getElementById(id).selectedOptions).map(o=>o.value);
+//////////////////////////////////////////////////////////
+// BUILD JSON FILENAME
+//////////////////////////////////////////////////////////
+
+function buildJsonFilename(metric, roi){
+
+    const metricName = metricMap[metric];
+    const roiName = roiMap[roi];
+
+    return `gamlss_${roiName}_${metricName}_Am_S0_Pm_Cms_SHASH_fp_npoly1.json`;
 }
 
-async function loadJSON(metric, roi) {
+//////////////////////////////////////////////////////////
+// LOAD CURVE
+//////////////////////////////////////////////////////////
 
-  const file = `gamlss/gamlss_gpdwis_PA_geomcorr_${roi}_gpdwis_PA_${metric}_median-PatientAge-_TF_fp.json`;
+async function loadCurve(metric, roi, gender='F'){
 
-  console.info("JSON", file);
-  try {
-    const res = await fetch(file);
-    if (!res.ok) throw new Error('not found');
-    return await res.json();
-  } catch (err) {
-    console.warn("Erro carregando", file);
-    return null;
-  }
-}
+    const filename = buildJsonFilename(metric, roi);
 
-function getSelected(id) {
-  return [...document.getElementById(id).selectedOptions].map(o=>o.value);
-}
+    console.log('Loading:', filename);
 
+    const response = await fetch(`curves/${filename}`);
 
-async function plotGraph() {
-    const metrics = getSelected("metricas");
-    const rois = getSelected("rois");
+    if(!response.ok){
 
-    const traces = [];
-
-    for (const m of metrics) {
-        for (const r of rois) {
-            const data = await loadJSON(m, r);
-            if (!data) continue;
-
-            const preds = data.predictions;
-            const cents = preds.percentis;
-
-            if (!cents || cents.length === 0) continue;
-
-            // Extrai arrays separados
-            const x = cents.map(d => d.x);
-            const p2_5 = cents.map(d => d["p2.5"]);
-            const p25 = cents.map(d => d.p25);
-            const p50 = cents.map(d => d.p50);
-            const p75 = cents.map(d => d.p75);
-            const p97_5 = cents.map(d => d["p97.5"]);
-
-            // Mediana (p50)
-            traces.push({
-                x: x,
-                y: p50,
-                mode: "lines",
-                name: `${r} - ${m} (p50)`,
-                line: { width: 3, color: "#000" }
-            });
-
-            // Percentis – estilo leve
-            [
-                ["p2.5", p2_5],
-                ["p25", p25],
-                ["p75", p75],
-                ["p97.5", p97_5]
-            ].forEach(([label, arr]) => {
-                traces.push({
-                    x: x,
-                    y: arr,
-                    mode: "lines",
-                    name: `${r} - ${m} (${label})`,
-                    line: { width: 2, dash: "dot" }
-                });
-            });
-        }
+        throw new Error(
+            `Arquivo não encontrado:\n${filename}`
+        );
     }
 
-    Plotly.newPlot("graph", traces, {
-        height: 650,
-        margin: { t: 40, b: 60, l: 60 },
-        xaxis: { title: "Age" },
-        yaxis: { title: "Metric Value" },
-        showlegend: true,
-    });
+    const json = await response.json();
+
+    return json.data[gender];
 }
 
+//////////////////////////////////////////////////////////
+// PLOT
+//////////////////////////////////////////////////////////
 
-document.getElementById('metricas').addEventListener('change', plotGraph);
-document.getElementById('rois').addEventListener('change', plotGraph);
-plotGraph();
+async function plotSelectedCurve(){
+
+    const metric =
+        document.getElementById('metricas').value;
+
+    const roi =
+        document.getElementById('rois').value;
+
+    const gender =
+        document.getElementById('gender').value;
+
+    try{
+
+        const curve =
+            await loadCurve(metric, roi, gender);
+
+        const x = curve.grid;
+
+        const traces = [
+
+            {
+                x:x,
+                y:curve.P3,
+                mode:'lines',
+                name:'P3',
+                line:{dash:'dot'}
+            },
+
+            {
+                x:x,
+                y:curve.P15,
+                mode:'lines',
+                name:'P15'
+            },
+
+            {
+                x:x,
+                y:curve.P50,
+                mode:'lines',
+                name:'P50',
+                line:{width:4}
+            },
+
+            {
+                x:x,
+                y:curve.P85,
+                mode:'lines',
+                name:'P85'
+            },
+
+            {
+                x:x,
+                y:curve.P97,
+                mode:'lines',
+                name:'P97',
+                line:{dash:'dot'}
+            }
+
+        ];
+
+        const layout = {
+
+            title: {
+
+                text: `${metric.toUpperCase()} | ${roi}`,
+                font:{size:22}
+            },
+
+            xaxis: {
+
+                title:'Age (years)',
+                gridcolor:'#e5e5e5'
+            },
+
+            yaxis: {
+
+                title:'Metric value',
+                gridcolor:'#e5e5e5'
+            },
+
+            hovermode:'x unified',
+
+            template:'plotly_white',
+
+            legend:{
+                orientation:'h',
+                y:-0.15
+            }
+        };
+
+        Plotly.newPlot(
+            'graph',
+            traces,
+            layout,
+            {responsive:true}
+        );
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        alert(err.message);
+    }
+}
+
+//////////////////////////////////////////////////////////
+// AUTO LOAD
+//////////////////////////////////////////////////////////
+
+plotSelectedCurve();
+
 </script>
+
 </body>
 </html>
