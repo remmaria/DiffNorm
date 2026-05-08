@@ -207,12 +207,7 @@ const metricMap = {
     noddi_ndi: 'bgpdwis_PA_noddi_ndi_median'
 };
 
-const roiMap = {
-
-    mask3d_e1: 'bgpdwis_PA_geomcorr_mask3d_e1',
-
-    tractseg_AF_left: 'tractseg_AF_left'
-};
+const roiMap = {};
 
 //////////////////////////////////////////////////////////
 // BUILD JSON FILENAME
@@ -221,26 +216,17 @@ const roiMap = {
 function buildJsonFilename(metric, roi){
 
     const metricName = metricMap[metric];
-    const roiName = roiMap[roi];
 
-    //////////////////////////////////////////////////////
-    // AGE TERM
-    //////////////////////////////////////////////////////
+    const roiName = roi;
 
     let ageTerm = 'Am';
 
-    // TODOS DTI = Ams
     if(metric.startsWith('dti_')){
         ageTerm = 'Ams';
     }
 
-    //////////////////////////////////////////////////////
-    // NPOLY
-    //////////////////////////////////////////////////////
-
     let npoly = 'npoly1';
 
-    // métricas específicas usam npoly2
     const npoly2Metrics = [
         'dti_fa',
         'dki_md',
@@ -251,20 +237,11 @@ function buildJsonFilename(metric, roi){
         npoly = 'npoly2';
     }
 
-    //////////////////////////////////////////////////////
-    // PROTOCOL
-    //////////////////////////////////////////////////////
-
     let protocol = 'P0';
 
-    // somente DKI_AK usa Pm
     if(metric === 'dki_ak'){
         protocol = 'Pm';
     }
-
-    //////////////////////////////////////////////////////
-    // BUILD
-    //////////////////////////////////////////////////////
 
     return `gamlss_${roiName}_${metricName}_${ageTerm}_S0_${protocol}_Cms_SHASH_fp_${npoly}.json`;
 }
@@ -292,9 +269,30 @@ async function loadCurve(metric, roi, gender='F'){
     return json.data[gender];
 }
 
-//////////////////////////////////////////////////////////
-// PLOT
-//////////////////////////////////////////////////////////
+async function populateROIs(){
+
+    const response =
+        await fetch("available_rois.json");
+
+    const rois = await response.json();
+
+    const select =
+        document.getElementById("rois");
+
+    select.innerHTML = "";
+
+    rois.forEach(roi => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = roi;
+
+        option.text = roi;
+
+        select.appendChild(option);
+    });
+}
 
 //////////////////////////////////////////////////////////
 // PLOT
@@ -487,6 +485,8 @@ function clearPlot(){
 //////////////////////////////////////////////////////////
 // AUTO LOAD
 //////////////////////////////////////////////////////////
+
+populateROIs();
 
 plotSelectedCurve();
 
