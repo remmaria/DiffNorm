@@ -216,6 +216,7 @@ function buildJsonFilename(metric, roi){
 
     let ageTerm = 'Am';
 
+    // TODOS DTI = Ams
     if(metric.startsWith('dti_')){
         ageTerm = 'Ams';
     }
@@ -226,10 +227,10 @@ function buildJsonFilename(metric, roi){
 
     let npoly = 'npoly1';
 
+    // métricas específicas usam npoly2
     const npoly2Metrics = [
         'dti_fa',
-        'dki_md',
-        'dki_fa'
+        'dti_md'
     ];
 
     if(npoly2Metrics.includes(metric)){
@@ -237,12 +238,22 @@ function buildJsonFilename(metric, roi){
     }
 
     //////////////////////////////////////////////////////
+    // PROTOCOL
+    //////////////////////////////////////////////////////
+
+    let protocol = 'P0';
+
+    // somente DKI_AK usa Pm
+    if(metric === 'dki_ak'){
+        protocol = 'Pm';
+    }
+
+    //////////////////////////////////////////////////////
     // BUILD
     //////////////////////////////////////////////////////
 
-    return `gamlss_${roiName}_${metricName}_${ageTerm}_S0_Pm_Cms_SHASH_fp_${npoly}.json`;
+    return `gamlss_${roiName}_${metricName}_${ageTerm}_S0_${protocol}_Cms_SHASH_fp_${npoly}.json`;
 }
-
 //////////////////////////////////////////////////////////
 // LOAD CURVE
 //////////////////////////////////////////////////////////
