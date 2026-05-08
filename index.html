@@ -182,6 +182,8 @@ const metricMap = {
     dki_ak: 'bgpdwis_PA_dki_ak_median',
     dki_mk: 'bgpdwis_PA_dki_mk_median',
     dki_rk: 'bgpdwis_PA_dki_rk_median',
+    dki_fa: 'bgpdwis_PA_dki_fa_median',
+    dki_md: 'bgpdwis_PA_dki_md_median',
 
     dti_fa: 'bgpdwis_PA_dti_fa_median',
     dti_ad: 'bgpdwis_PA_dti_ad_median',
@@ -189,8 +191,7 @@ const metricMap = {
     dti_rd: 'bgpdwis_PA_dti_rd_median',
 
     noddi_odi: 'bgpdwis_PA_noddi_odi_median',
-    noddi_ndi: 'bgpdwis_PA_noddi_ndi_median',
-    noddi_fwf: 'bgpdwis_PA_noddi_fwf_median'
+    noddi_ndi: 'bgpdwis_PA_noddi_ndi_median'
 };
 
 const roiMap = {
@@ -209,7 +210,37 @@ function buildJsonFilename(metric, roi){
     const metricName = metricMap[metric];
     const roiName = roiMap[roi];
 
-    return `gamlss_${roiName}_${metricName}_Am_S0_Pm_Cms_SHASH_fp_npoly1.json`;
+    //////////////////////////////////////////////////////
+    // AGE TERM
+    //////////////////////////////////////////////////////
+
+    let ageTerm = 'Am';
+
+    if(metric.startsWith('dti_')){
+        ageTerm = 'Ams';
+    }
+
+    //////////////////////////////////////////////////////
+    // NPOLY
+    //////////////////////////////////////////////////////
+
+    let npoly = 'npoly1';
+
+    const npoly2Metrics = [
+        'dti_fa',
+        'dki_md',
+        'dki_fa'
+    ];
+
+    if(npoly2Metrics.includes(metric)){
+        npoly = 'npoly2';
+    }
+
+    //////////////////////////////////////////////////////
+    // BUILD
+    //////////////////////////////////////////////////////
+
+    return `gamlss_${roiName}_${metricName}_${ageTerm}_S0_Pm_Cms_SHASH_fp_${npoly}.json`;
 }
 
 //////////////////////////////////////////////////////////
