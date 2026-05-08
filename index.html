@@ -160,8 +160,13 @@ button:hover{
         <button onclick="plotSelectedCurve()">
             Plot Curve
         </button>
+        <button onclick="clearPlot()">
+            Clear Plot
+        </button>
 
     </div>
+
+
 
     <div class="graph-container">
 
@@ -172,6 +177,14 @@ button:hover{
 </div>
 
 <script>
+
+
+//////////////////////////////////////////////////////////
+// GLOBAL STORAGE
+//////////////////////////////////////////////////////////
+
+let allTraces = [];
+let curveCount = 0;
 
 //////////////////////////////////////////////////////////
 // MAPS
@@ -283,6 +296,10 @@ async function loadCurve(metric, roi, gender='F'){
 // PLOT
 //////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////
+// PLOT
+//////////////////////////////////////////////////////////
+
 async function plotSelectedCurve(){
 
     const metric =
@@ -301,53 +318,108 @@ async function plotSelectedCurve(){
 
         const x = curve.grid;
 
+        ////////////////////////////////////////////////////
+        // UNIQUE COLOR
+        ////////////////////////////////////////////////////
+
+        const hue = (curveCount * 57) % 360;
+
+        const color =
+            `hsl(${hue},70%,45%)`;
+
+        curveCount++;
+
+        ////////////////////////////////////////////////////
+        // PREFIX
+        ////////////////////////////////////////////////////
+
+        const prefix =
+            `${metric.toUpperCase()} | ${roi} | ${gender}`;
+
+        ////////////////////////////////////////////////////
+        // TRACES
+        ////////////////////////////////////////////////////
+
         const traces = [
 
             {
                 x:x,
                 y:curve.P3,
                 mode:'lines',
-                name:'P3',
-                line:{dash:'dot'}
+                name:`${prefix} P3`,
+                line:{
+                    dash:'dot',
+                    color:color,
+                    width:1
+                },
+                opacity:0.35
             },
 
             {
                 x:x,
                 y:curve.P15,
                 mode:'lines',
-                name:'P15'
+                name:`${prefix} P15`,
+                line:{
+                    color:color,
+                    width:1
+                },
+                opacity:0.5
             },
 
             {
                 x:x,
                 y:curve.P50,
                 mode:'lines',
-                name:'P50',
-                line:{width:4}
+                name:`${prefix} P50`,
+                line:{
+                    color:color,
+                    width:4
+                }
             },
 
             {
                 x:x,
                 y:curve.P85,
                 mode:'lines',
-                name:'P85'
+                name:`${prefix} P85`,
+                line:{
+                    color:color,
+                    width:1
+                },
+                opacity:0.5
             },
 
             {
                 x:x,
                 y:curve.P97,
                 mode:'lines',
-                name:'P97',
-                line:{dash:'dot'}
+                name:`${prefix} P97`,
+                line:{
+                    dash:'dot',
+                    color:color,
+                    width:1
+                },
+                opacity:0.35
             }
 
         ];
+
+        ////////////////////////////////////////////////////
+        // APPEND
+        ////////////////////////////////////////////////////
+
+        allTraces.push(...traces);
+
+        ////////////////////////////////////////////////////
+        // LAYOUT
+        ////////////////////////////////////////////////////
 
         const layout = {
 
             title: {
 
-                text: `${metric.toUpperCase()} | ${roi}`,
+                text:'Normative Curves',
                 font:{size:22}
             },
 
@@ -369,13 +441,18 @@ async function plotSelectedCurve(){
 
             legend:{
                 orientation:'h',
-                y:-0.15
+                y:-0.2
             }
+
         };
 
-        Plotly.newPlot(
+        ////////////////////////////////////////////////////
+        // REACT
+        ////////////////////////////////////////////////////
+
+        Plotly.react(
             'graph',
-            traces,
+            allTraces,
             layout,
             {responsive:true}
         );
@@ -387,6 +464,24 @@ async function plotSelectedCurve(){
 
         alert(err.message);
     }
+}
+
+//////////////////////////////////////////////////////////
+// CLEAR
+//////////////////////////////////////////////////////////
+
+function clearPlot(){
+
+    allTraces = [];
+
+    curveCount = 0;
+
+    Plotly.react(
+        'graph',
+        [],
+        {},
+        {responsive:true}
+    );
 }
 
 //////////////////////////////////////////////////////////
