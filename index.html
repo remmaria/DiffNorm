@@ -75,7 +75,7 @@ header {
 .layout {
   display: flex;
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* ── SIDEBAR ─────────────────────────────────────────── */
@@ -89,6 +89,10 @@ header {
   overflow-y: auto;
   padding: 20px 16px 24px;
   gap: 20px;
+}
+.sidebar {
+  position: relative;
+  z-index: 10;
 }
 
 .section-label {
@@ -303,13 +307,14 @@ select optgroup { background: #161b22; font-weight: 600; }
 
 .curve-tag {
   position: relative;
+  overflow: visible;
 }
 
 .curve-tooltip {
 
   position: absolute;
 
-  left: calc(100% + 8px);
+  left: 105%;
   top: 50%;
 
   transform: translateY(-50%);
@@ -330,11 +335,15 @@ select optgroup { background: #161b22; font-weight: 600; }
 
   white-space: normal;
 
-  max-width: 320px;
+  width: max-content;
+
+  min-width: 180px;
+
+  max-width: 420px;
 
   line-height: 1.4;
 
-  z-index: 99999;
+  z-index: 999999;
 
   opacity: 0;
 
@@ -343,6 +352,8 @@ select optgroup { background: #161b22; font-weight: 600; }
   transition: opacity 0.12s ease;
 
   box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+
+  overflow-wrap: break-word;
 }
 
 .curve-tag:hover .curve-tooltip {
@@ -387,7 +398,7 @@ select optgroup { background: #161b22; font-weight: 600; }
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   padding: 16px;
   gap: 12px;
 }
