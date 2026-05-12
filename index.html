@@ -785,61 +785,79 @@ async function loadFileIndex() {
   BUT npoly can vary — so we look up in FILE_INDEX first, then fallback to hardcoded rules.
 */
 
+//////////////////////////////////////////////////////////
+// METRIC NAME MAP
+//////////////////////////////////////////////////////////
+
 const METRIC_NAME_MAP = {
+
   dki_ak:    'bgpdwis_PA_dki_ak_median',
   dki_mk:    'bgpdwis_PA_dki_mk_median',
   dki_rk:    'bgpdwis_PA_dki_rk_median',
   dki_fa:    'bgpdwis_PA_dki_fa_median',
   dki_md:    'bgpdwis_PA_dki_md_median',
+
   dti_fa:    'bgpdwis_PA_dti_fa_median',
   dti_ad:    'bgpdwis_PA_dti_ad_median',
   dti_md:    'bgpdwis_PA_dti_md_median',
   dti_rd:    'bgpdwis_PA_dti_rd_median',
+
   noddi_odi: 'bgpdwis_PA_noddi_odi_median',
   noddi_ndi: 'bgpdwis_PA_noddi_ndi_median',
-  noddi_fwf: 'bgpdwis_PA_noddi_fwf_median',
 };
 
-function getAgeTerm(metric) {
-  return metric.startsWith('dti_') ? 'Ams' : 'Am';
-}
+//////////////////////////////////////////////////////////
+// FILENAME LOOKUP
+//////////////////////////////////////////////////////////
 
-function getProtocol(metric) {
-  return (metric === 'dki_ak' || metric === 'noddi_odi') ? 'Pm' : 'P0';
-}
-
-function getNpoly(metric) {
-  // hardcoded defaults — overridden by index lookup
-  return (metric === 'dti_fa' || metric === 'dki_fa' || metric === 'dki_md') ? 'npoly2' : 'npoly1';
-}
-
-/**
- * Build the JSON filename for a given ROI string + metric.
- * If FILE_INDEX is populated, we search for the real filename by prefix match.
- * This handles varying npoly, protocol, etc.
- */
 function buildJsonFilename(metric, roi) {
+
   const metricName = METRIC_NAME_MAP[metric];
-  if (!metricName) return null;
 
-  const ageTerm  = getAgeTerm(metric);
-  const protocol = getProtocol(metric);
-
-  // Build prefix that is stable regardless of npoly variation
-  // Pattern: gamlss_<ROI>_<metricName>_<ageTerm>_S0_<protocol>_Cms_SHASH_fp_
-  const stablePrefix = `gamlss_${roi}_${metricName}_${ageTerm}_S0_${protocol}_Cms_SHASH_fp_`;
-
-  // Try to find in index
-  if (FILE_INDEX.size > 0) {
-    for (const fname of FILE_INDEX) {
-      if (fname.startsWith(stablePrefix)) return fname;
-    }
-    // Not found in index
+  if (!metricName) {
+    console.error(`Unknown metric: ${metric}`);
     return null;
   }
 
-  // Fallback: use hardcoded npoly
-  return `${stablePrefix}${getNpoly(metric)}.json`;
+  //////////////////////////////////////////////////////
+  // NO INDEX AVAILABLE
+  //////////////////////////////////////////////////////
+
+  if (FILE_INDEX.size === 0) {
+
+    console.warn('FILE_INDEX vazio');
+
+    return null;
+  }
+
+  //////////////////////////////////////////////////////
+  // FLEXIBLE SEARCH
+  //////////////////////////////////////////////////////
+
+  for (const fname of FILE_INDEX) {
+
+    // precisa:
+    // 1) começar com gamlss_
+    // 2) conter ROI inteira
+    // 3) conter métrica inteira
+
+    if (
+      fname.startsWith('gamlss_') &&
+      fname.includes(`_${roi}_`) &&
+      fname.includes(`_${metricName}_`)
+    ) {
+
+      return fname;
+    }
+  }
+
+  //////////////////////////////////////////////////////
+  // NOT FOUND
+  //////////////////////////////////////////////////////
+
+  console.warn(`No filename found for ROI=${roi} metric=${metric}`);
+
+  return null;
 }
 
 //////////////////////////////////////////////////////////
