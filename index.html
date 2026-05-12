@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>7TBRP Diffusion MRI Normative Charts</title>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -1163,28 +1163,52 @@ function renderPlotFull() {
 //////////////////////////////////////////////////////////
 
 function renderCurveList() {
-  const list = document.getElementById('curve-list');
-  const none = document.getElementById('no-curves');
 
-  if (plotted.length === 0) {
-    list.innerHTML = '';
-    list.appendChild(none);
-    none.style.display = '';
+  const list = document.getElementById('curve-list');
+
+  if (!list) {
+    console.error('curve-list não encontrado');
     return;
   }
 
-  none.style.display = 'none';
+  // limpa tudo SEM guardar referência antiga
   list.innerHTML = '';
 
+  // sem curvas
+  if (plotted.length === 0) {
+
+    const empty = document.createElement('div');
+    empty.id = 'no-curves';
+    empty.textContent = 'No curves plotted yet.';
+
+    list.appendChild(empty);
+
+    return;
+  }
+
+  // render curvas
   plotted.forEach(p => {
+
     const tag = document.createElement('div');
+
     tag.className = 'curve-tag';
     tag.id = `tag-${p.id}`;
+
     tag.innerHTML = `
       <span class="curve-dot" style="background:${p.color}"></span>
-      <span class="curve-tag-text" title="${p.label}">${p.label}</span>
-      <button class="curve-remove" onclick="removeCurve('${p.id}')" title="Remove">×</button>
+
+      <span class="curve-tag-text"
+            title="${p.label}">
+            ${p.label}
+      </span>
+
+      <button class="curve-remove"
+              onclick="removeCurve('${p.id}')"
+              title="Remove">
+              ×
+      </button>
     `;
+
     list.appendChild(tag);
   });
 }
