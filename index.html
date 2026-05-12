@@ -233,9 +233,8 @@ select optgroup { background: #161b22; font-weight: 600; }
   line-height: 1.5;
 }
 
-#roi-preview span.key {
-  color: var(--accent);
-}
+#roi-preview span.key { color: var(--accent); }
+#roi-preview span.warn { color: var(--accent3); }
 
 /* ── DIVIDER ─────────────────────────────────────────── */
 .divider {
@@ -268,6 +267,7 @@ select optgroup { background: #161b22; font-weight: 600; }
 
 .btn-primary:hover { background: #79b8ff; transform: translateY(-1px); }
 .btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 .btn-ghost {
   background: transparent;
@@ -348,7 +348,7 @@ select optgroup { background: #161b22; font-weight: 600; }
   flex: 1;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: #ffffff;
   overflow: hidden;
 }
 
@@ -367,8 +367,8 @@ select optgroup { background: #161b22; font-weight: 600; }
   gap: 8px;
 }
 
-#status-bar.error { color: var(--accent3); border-color: rgba(247,129,102,0.3); }
-#status-bar.ok    { color: var(--accent2); border-color: rgba(63,185,80,0.3); }
+#status-bar.error   { color: var(--accent3); border-color: rgba(247,129,102,0.3); }
+#status-bar.ok      { color: var(--accent2); border-color: rgba(63,185,80,0.3); }
 #status-bar.loading { color: var(--accent); }
 
 .status-dot {
@@ -383,6 +383,34 @@ select optgroup { background: #161b22; font-weight: 600; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+/* ── MACRO-GROUP PILLS ───────────────────────────────── */
+.macro-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.macro-pill {
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.macro-pill:hover { border-color: var(--text-muted); color: var(--text); }
+
+.macro-pill.active {
+  background: rgba(88,166,255,0.15);
+  border-color: var(--accent);
+  color: var(--accent);
+}
 </style>
 </head>
 
@@ -428,13 +456,32 @@ select optgroup { background: #161b22; font-weight: 600; }
             <option value="dki_ak" selected>DKI — AK (Axial Kurtosis)</option>
             <option value="dki_mk">DKI — MK (Mean Kurtosis)</option>
             <option value="dki_rk">DKI — RK (Radial Kurtosis)</option>
+            <option value="dki_fa">DKI — FA</option>
+            <option value="dki_md">DKI — MD</option>
           </optgroup>
           <optgroup label="NODDI">
             <option value="noddi_odi">NODDI — ODI</option>
             <option value="noddi_ndi">NODDI — NDI</option>
-            <option value="noddi_fwf">NODDI — FWF</option>
           </optgroup>
         </select>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- MACRO GROUP FILTER -->
+    <div class="field-group">
+      <div class="section-label">Macro Group Filter</div>
+      <div class="macro-pills" id="macro-pills">
+        <button class="macro-pill active" data-val="all" onclick="setMacro('all')">All</button>
+        <button class="macro-pill" data-val="Association" onclick="setMacro('Association')">Association</button>
+        <button class="macro-pill" data-val="Commissural" onclick="setMacro('Commissural')">Commissural</button>
+        <button class="macro-pill" data-val="Projection" onclick="setMacro('Projection')">Projection</button>
+        <button class="macro-pill" data-val="Cerebellar/Brainstem" onclick="setMacro('Cerebellar/Brainstem')">Cerebellar</button>
+        <button class="macro-pill" data-val="White_Matter" onclick="setMacro('White_Matter')">White Matter</button>
+        <button class="macro-pill" data-val="Gray_Matter" onclick="setMacro('Gray_Matter')">Gray Matter</button>
+        <button class="macro-pill" data-val="Whole_Brain" onclick="setMacro('Whole_Brain')">Whole Brain</button>
+        <button class="macro-pill" data-val="Mixed" onclick="setMacro('Mixed')">Mixed</button>
       </div>
     </div>
 
@@ -478,7 +525,7 @@ select optgroup { background: #161b22; font-weight: 600; }
 
     <!-- ACTIONS -->
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="plotSelectedCurve()">
+      <button class="btn btn-primary" id="btn-plot" onclick="plotSelectedCurve()">
         ＋ Plot
       </button>
       <button class="btn btn-ghost" onclick="clearPlot()">
@@ -503,7 +550,7 @@ select optgroup { background: #161b22; font-weight: 600; }
     <div id="graph"></div>
     <div id="status-bar">
       <span class="status-dot"></span>
-      <span id="status-text">Ready.</span>
+      <span id="status-text">Loading file index…</span>
     </div>
   </div>
 
@@ -512,87 +559,117 @@ select optgroup { background: #161b22; font-weight: 600; }
 <script>
 
 //////////////////////////////////////////////////////////
-// DATA: ROI CATALOGUE
-// Maps source → list of { label, key, bilateral }
-// key is the middle part of the ROI filename
+// ROI CATALOGUE & MACRO-GROUP MAP
 //////////////////////////////////////////////////////////
+
+// MacroGroup for each ROI key/source
+const MACRO_MAP = {
+  // JHU
+  jhu: {
+    ACR:   'Projection', ALIC:  'Projection', BCC:   'Commissural', CC:    'Commissural',
+    CGC:   'Association', CGH:   'Association', CP:    'Projection', CST:   'Projection',
+    EC:    'Association', FX_ST: 'Association', FX:    'Association', GCC:   'Commissural',
+    ICP:   'Cerebellar/Brainstem', MCP:   'Cerebellar/Brainstem', ML:    'Cerebellar/Brainstem',
+    PCR:   'Projection', PCT:   'Cerebellar/Brainstem', PLIC:  'Projection', PTR:   'Projection',
+    RLIC:  'Projection', SCC:   'Commissural', SCP:   'Cerebellar/Brainstem', SCR:   'Projection',
+    SFO:   'Association', SLF:   'Association', SS:    'Association', TAP:   'Commissural',
+    UF:    'Association',
+  },
+  tractseg: {
+    AF: 'Association', ATR: 'Projection', CA: 'Commissural', CC: 'Commissural',
+    CC_1: 'Commissural', CC_2: 'Commissural', CC_3: 'Commissural', CC_4: 'Commissural',
+    CC_5: 'Commissural', CC_6: 'Commissural', CC_7: 'Commissural',
+    CG: 'Association', CST: 'Projection', FPT: 'Projection', FX: 'Association',
+    ICP: 'Cerebellar/Brainstem', IFO: 'Association', ILF: 'Association',
+    MCP: 'Cerebellar/Brainstem', MLF: 'Association', OR: 'Projection',
+    POPT: 'Projection', SCP: 'Cerebellar/Brainstem',
+    SLF_I: 'Association', SLF_II: 'Association', SLF_III: 'Association',
+    STR: 'Projection',
+    ST_FO: 'Projection', ST_OCC: 'Projection', ST_PAR: 'Projection',
+    ST_POSTC: 'Projection', ST_PREC: 'Projection', ST_PREF: 'Projection', ST_PREM: 'Projection',
+    T_OCC: 'Projection', T_PAR: 'Projection', T_POSTC: 'Projection',
+    T_PREC: 'Projection', T_PREF: 'Projection', T_PREM: 'Projection',
+    UF: 'Association',
+  },
+  mask:     { mask3d: 'Whole_Brain' },
+  synthseg: { CbWM: 'White_Matter', CbllWM: 'White_Matter', Ctx: 'Gray_Matter', Hipp: 'Gray_Matter', SubCtx: 'Gray_Matter' },
+};
 
 const ROI_CATALOGUE = {
 
   jhu: [
-    { label: "Anterior Corona Radiata",        key: "ACR",    bilateral: true  },
-    { label: "Anterior Limb of Int. Capsule",  key: "ALIC",   bilateral: true  },
-    { label: "Body of Corpus Callosum",        key: "BCC",    bilateral: false },
-    { label: "Corpus Callosum",                key: "CC",     bilateral: false },
-    { label: "Cingulum (cingulate gyrus)",     key: "CGC",    bilateral: true  },
-    { label: "Cingulum (hippocampus)",         key: "CGH",    bilateral: true  },
-    { label: "Cerebral Peduncle",              key: "CP",     bilateral: true  },
-    { label: "Corticospinal Tract",            key: "CST",    bilateral: true  },
-    { label: "External Capsule",               key: "EC",     bilateral: true  },
-    { label: "Fornix (cres) / Stria terminalis", key: "FX_ST", bilateral: true },
-    { label: "Fornix",                         key: "FX",     bilateral: false },
-    { label: "Genu of Corpus Callosum",        key: "GCC",    bilateral: false },
-    { label: "Inferior Cerebellar Peduncle",   key: "ICP",    bilateral: true  },
-    { label: "Middle Cerebellar Peduncle",     key: "MCP",    bilateral: false },
-    { label: "Medial Lemniscus",               key: "ML",     bilateral: true  },
-    { label: "Posterior Corona Radiata",       key: "PCR",    bilateral: true  },
-    { label: "Pontine Crossing Tract",         key: "PCT",    bilateral: false },
-    { label: "Post. Limb of Int. Capsule",     key: "PLIC",   bilateral: true  },
-    { label: "Post. Thalamic Radiation",       key: "PTR",    bilateral: true  },
-    { label: "Retrolenticular Int. Capsule",   key: "RLIC",   bilateral: true  },
-    { label: "Splenium of Corpus Callosum",    key: "SCC",    bilateral: false },
-    { label: "Superior Cerebellar Peduncle",   key: "SCP",    bilateral: true  },
-    { label: "Superior Corona Radiata",        key: "SCR",    bilateral: true  },
-    { label: "Superior Fronto-Occipital Fasc.",key: "SFO",    bilateral: true  },
-    { label: "Superior Longitudinal Fasc.",    key: "SLF",    bilateral: true  },
-    { label: "Sagittal Stratum",               key: "SS",     bilateral: true  },
-    { label: "Tapetum",                        key: "TAP",    bilateral: true  },
-    { label: "Uncinate Fasciculus",            key: "UF",     bilateral: true  },
+    { label: "Anterior Corona Radiata",          key: "ACR",    bilateral: true  },
+    { label: "Anterior Limb of Int. Capsule",    key: "ALIC",   bilateral: true  },
+    { label: "Body of Corpus Callosum",          key: "BCC",    bilateral: false },
+    { label: "Corpus Callosum",                  key: "CC",     bilateral: false },
+    { label: "Cingulum (cingulate gyrus)",       key: "CGC",    bilateral: true  },
+    { label: "Cingulum (hippocampus)",           key: "CGH",    bilateral: true  },
+    { label: "Cerebral Peduncle",                key: "CP",     bilateral: true  },
+    { label: "Corticospinal Tract",              key: "CST",    bilateral: true  },
+    { label: "External Capsule",                 key: "EC",     bilateral: true  },
+    { label: "Fornix (cres) / Stria terminalis", key: "FX_ST",  bilateral: true  },
+    { label: "Fornix",                           key: "FX",     bilateral: false },
+    { label: "Genu of Corpus Callosum",          key: "GCC",    bilateral: false },
+    { label: "Inferior Cerebellar Peduncle",     key: "ICP",    bilateral: true  },
+    { label: "Middle Cerebellar Peduncle",       key: "MCP",    bilateral: false },
+    { label: "Medial Lemniscus",                 key: "ML",     bilateral: true  },
+    { label: "Posterior Corona Radiata",         key: "PCR",    bilateral: true  },
+    { label: "Pontine Crossing Tract",           key: "PCT",    bilateral: false },
+    { label: "Post. Limb of Int. Capsule",       key: "PLIC",   bilateral: true  },
+    { label: "Post. Thalamic Radiation",         key: "PTR",    bilateral: true  },
+    { label: "Retrolenticular Int. Capsule",     key: "RLIC",   bilateral: true  },
+    { label: "Splenium of Corpus Callosum",      key: "SCC",    bilateral: false },
+    { label: "Superior Cerebellar Peduncle",     key: "SCP",    bilateral: true  },
+    { label: "Superior Corona Radiata",          key: "SCR",    bilateral: true  },
+    { label: "Superior Fronto-Occipital Fasc.",  key: "SFO",    bilateral: true  },
+    { label: "Superior Longitudinal Fasc.",      key: "SLF",    bilateral: true  },
+    { label: "Sagittal Stratum",                 key: "SS",     bilateral: true  },
+    { label: "Tapetum",                          key: "TAP",    bilateral: true  },
+    { label: "Uncinate Fasciculus",              key: "UF",     bilateral: true  },
   ],
 
   tractseg: [
-    { label: "Arcuate Fasciculus",                   key: "AF",         bilateral: true  },
-    { label: "Anterior Thalamic Radiation",          key: "ATR",        bilateral: true  },
-    { label: "Commissure Anterior",                  key: "CA",         bilateral: false },
-    { label: "Corpus Callosum (TractSeg)",           key: "CC",         bilateral: false },
-    { label: "Corpus Callosum (CC_2)",               key: "CC_2",       bilateral: false },
-    { label: "CC — 1: Rostrum",                      key: "CC_1",       bilateral: false },
-    { label: "CC — 2: Genu",                         key: "CC_2",       bilateral: false },
-    { label: "CC — 3: Rostral Body",                 key: "CC_3",       bilateral: false },
-    { label: "CC — 4: Ant. Midbody (Motor)",         key: "CC_4",       bilateral: false },
-    { label: "CC — 5: Post. Midbody (Sensory)",      key: "CC_5",       bilateral: false },
-    { label: "CC — 6: Isthmus",                      key: "CC_6",       bilateral: false },
-    { label: "CC — 7: Splenium",                     key: "CC_7",       bilateral: false },
-    { label: "Cingulum",                             key: "CG",         bilateral: true  },
-    { label: "Corticospinal Tract",                  key: "CST",        bilateral: true  },
-    { label: "Fronto-Pontine Tract",                 key: "FPT",        bilateral: true  },
-    { label: "Fornix",                               key: "FX",         bilateral: true  },
-    { label: "Inferior Cerebellar Peduncle",         key: "ICP",        bilateral: true  },
-    { label: "Inf. Occipito-Frontal Fasciculus",     key: "IFO",        bilateral: true  },
-    { label: "Inferior Longitudinal Fasciculus",     key: "ILF",        bilateral: true  },
-    { label: "Middle Cerebellar Peduncle",           key: "MCP",        bilateral: false },
-    { label: "Middle Longitudinal Fasciculus",       key: "MLF",        bilateral: true  },
-    { label: "Optic Radiation",                      key: "OR",         bilateral: true  },
-    { label: "Parieto-Occipital Pontine",            key: "POPT",       bilateral: true  },
-    { label: "Superior Cerebellar Peduncle",         key: "SCP",        bilateral: true  },
-    { label: "Superior Long. Fasciculus I",          key: "SLF_I",      bilateral: true  },
-    { label: "Superior Long. Fasciculus II",         key: "SLF_II",     bilateral: true  },
-    { label: "Superior Long. Fasciculus III",        key: "SLF_III",    bilateral: true  },
-    { label: "Superior Thalamic Radiation",          key: "STR",        bilateral: true  },
-    { label: "Striato-Fronto-Orbital",               key: "ST_FO",      bilateral: true  },
-    { label: "Striato-Occipital",                    key: "ST_OCC",     bilateral: true  },
-    { label: "Striato-Parietal",                     key: "ST_PAR",     bilateral: true  },
-    { label: "Striato-Postcentral",                  key: "ST_POSTC",   bilateral: true  },
-    { label: "Striato-Precentral",                   key: "ST_PREC",    bilateral: true  },
-    { label: "Striato-Prefrontal",                   key: "ST_PREF",    bilateral: true  },
-    { label: "Striato-Premotor",                     key: "ST_PREM",    bilateral: true  },
-    { label: "Thalamo-Occipital",                    key: "T_OCC",      bilateral: true  },
-    { label: "Thalamo-Parietal",                     key: "T_PAR",      bilateral: true  },
-    { label: "Thalamo-Postcentral",                  key: "T_POSTC",    bilateral: true  },
-    { label: "Thalamo-Precentral",                   key: "T_PREC",     bilateral: true  },
-    { label: "Thalamo-Prefrontal",                   key: "T_PREF",     bilateral: true  },
-    { label: "Thalamo-Premotor",                     key: "T_PREM",     bilateral: true  },
-    { label: "Uncinate Fasciculus",                  key: "UF",         bilateral: true  },
+    { label: "Arcuate Fasciculus",               key: "AF",       bilateral: true  },
+    { label: "Anterior Thalamic Radiation",      key: "ATR",      bilateral: true  },
+    { label: "Commissure Anterior",              key: "CA",       bilateral: false },
+    { label: "Corpus Callosum (all)",            key: "CC",       bilateral: false },
+    { label: "CC — 1: Rostrum",                  key: "CC_1",     bilateral: false },
+    { label: "CC — 2: Genu",                     key: "CC_2",     bilateral: false },
+    { label: "CC — 3: Rostral Body",             key: "CC_3",     bilateral: false },
+    { label: "CC — 4: Ant. Midbody (Motor)",     key: "CC_4",     bilateral: false },
+    { label: "CC — 5: Post. Midbody (Sensory)",  key: "CC_5",     bilateral: false },
+    { label: "CC — 6: Isthmus",                  key: "CC_6",     bilateral: false },
+    { label: "CC — 7: Splenium",                 key: "CC_7",     bilateral: false },
+    { label: "Cingulum",                         key: "CG",       bilateral: true  },
+    { label: "Corticospinal Tract",              key: "CST",      bilateral: true  },
+    { label: "Fronto-Pontine Tract",             key: "FPT",      bilateral: true  },
+    { label: "Fornix",                           key: "FX",       bilateral: true  },
+    { label: "Inferior Cerebellar Peduncle",     key: "ICP",      bilateral: true  },
+    { label: "Inf. Occipito-Frontal Fasciculus", key: "IFO",      bilateral: true  },
+    { label: "Inferior Longitudinal Fasciculus", key: "ILF",      bilateral: true  },
+    { label: "Middle Cerebellar Peduncle",       key: "MCP",      bilateral: false },
+    { label: "Middle Longitudinal Fasciculus",   key: "MLF",      bilateral: true  },
+    { label: "Optic Radiation",                  key: "OR",       bilateral: true  },
+    { label: "Parieto-Occipital Pontine",        key: "POPT",     bilateral: true  },
+    { label: "Superior Cerebellar Peduncle",     key: "SCP",      bilateral: true  },
+    { label: "Superior Long. Fasciculus I",      key: "SLF_I",    bilateral: true  },
+    { label: "Superior Long. Fasciculus II",     key: "SLF_II",   bilateral: true  },
+    { label: "Superior Long. Fasciculus III",    key: "SLF_III",  bilateral: true  },
+    { label: "Superior Thalamic Radiation",      key: "STR",      bilateral: true  },
+    { label: "Striato-Fronto-Orbital",           key: "ST_FO",    bilateral: true  },
+    { label: "Striato-Occipital",                key: "ST_OCC",   bilateral: true  },
+    { label: "Striato-Parietal",                 key: "ST_PAR",   bilateral: true  },
+    { label: "Striato-Postcentral",              key: "ST_POSTC", bilateral: true  },
+    { label: "Striato-Precentral",               key: "ST_PREC",  bilateral: true  },
+    { label: "Striato-Prefrontal",               key: "ST_PREF",  bilateral: true  },
+    { label: "Striato-Premotor",                 key: "ST_PREM",  bilateral: true  },
+    { label: "Thalamo-Occipital",                key: "T_OCC",    bilateral: true  },
+    { label: "Thalamo-Parietal",                 key: "T_PAR",    bilateral: true  },
+    { label: "Thalamo-Postcentral",              key: "T_POSTC",  bilateral: true  },
+    { label: "Thalamo-Precentral",               key: "T_PREC",   bilateral: true  },
+    { label: "Thalamo-Prefrontal",               key: "T_PREF",   bilateral: true  },
+    { label: "Thalamo-Premotor",                 key: "T_PREM",   bilateral: true  },
+    { label: "Uncinate Fasciculus",              key: "UF",       bilateral: true  },
   ],
 
   mask: [
@@ -600,81 +677,58 @@ const ROI_CATALOGUE = {
   ],
 
   synthseg: [
-    { label: "Cerebellar WM (CbWM)",           key: "CbWM",     bilateral: true  },
-    { label: "Cerebellar WM (CbllWM)",         key: "CbllWM",   bilateral: true  },
-    { label: "Cortex",                         key: "Ctx",      bilateral: true  },
-    { label: "Hippocampus",                    key: "Hipp",     bilateral: true  },
-    { label: "Subcortical",                    key: "SubCtx",   bilateral: true  },
+    { label: "Cerebellar WM (CbllWM)", key: "CbllWM",  bilateral: true  },
+    { label: "Cerebral WM (CbWM)",     key: "CbWM",    bilateral: true  },
+    { label: "Cortex",                 key: "Ctx",     bilateral: true  },
+    { label: "Hippocampus",            key: "Hipp",    bilateral: true  },
+    { label: "Subcortical",            key: "SubCtx",  bilateral: true  },
   ],
 };
 
-// Maps source + key + hemi → actual ROI string in available_rois.json
-function resolveRoiString(source, key, hemi) {
-  if (source === 'jhu') {
-    const base = `JHUICBMlabels1mm_warped_s_${key}`;
-    if (hemi === 'both' || hemi === 'L') {
-      // For bilateral we just return one; caller handles both
-    }
-    if (hemi === 'L') return `${base}_L_e1`;
-    if (hemi === 'R') return `${base}_R_e1`;
-    // non-bilateral
-    return `${base}_e1`;
-  }
+//////////////////////////////////////////////////////////
+// FILENAME INDEX  (loaded from file_names.txt)
+//////////////////////////////////////////////////////////
 
-  if (source === 'tractseg') {
-    const prefix = key.startsWith('CC') && key !== 'CST' && key !== 'CGC' && key !== 'CG'
-      ? (key === 'CC' ? 'tractseg2' : 'tractseg')
-      : 'tractseg';
-    const base = key === 'CC' ? `tractseg2_CC` : `tractseg_${key}`;
-    if (hemi === 'L') return `${base}_left_e1`;
-    if (hemi === 'R') return `${base}_right_e1`;
-    // non-bilateral
-    return `${base}_e1`;
-  }
+// Set of all known filenames without path
+let FILE_INDEX = new Set();
 
-  if (source === 'mask') {
-    return 'bgpdwis_PA_geomcorr_mask3d_e1';
+async function loadFileIndex() {
+  try {
+    const r = await fetch('file_names.txt');
+    if (!r.ok) throw new Error('file_names.txt not found');
+    const text = await r.text();
+    FILE_INDEX = new Set(
+      text.split('\n')
+          .map(l => l.trim())
+          .filter(l => l.endsWith('.json'))
+    );
+    setStatus('Ready. Select a metric and ROI, then click Plot.', '');
+  } catch (e) {
+    // graceful degradation — file_names.txt not required, just means
+    // we can't validate filenames before fetching
+    setStatus('Ready (no file index). Select metric and ROI, then click Plot.', '');
   }
-
-  if (source === 'synthseg') {
-    const base = `bgpdwis_PA_geomcorr_maskseg_${key}`;
-    if (hemi === 'L') return `${base}_L_e1`;
-    if (hemi === 'R') return `${base}_R_e1`;
-    // shouldn't reach here
-    return `${base}_L_e1`;
-  }
-
-  return null;
-}
-
-// Returns array of ROI strings to plot (1 or 2 for "both")
-function getRoiStrings(source, key, hemi, bilateral) {
-  if (!bilateral || hemi !== 'both') {
-    return [resolveRoiString(source, key, hemi)];
-  }
-  return [
-    resolveRoiString(source, key, 'L'),
-    resolveRoiString(source, key, 'R'),
-  ];
+  populateRoiNames();
 }
 
 //////////////////////////////////////////////////////////
-// STATE
+// FILENAME BUILDER  (dynamic lookup)
 //////////////////////////////////////////////////////////
 
-let selectedGender = 'F';
-let selectedHemi   = 'L';
-let allTraces      = [];
-let curveCount     = 0;
+/*
+  Pattern (from real files):
+    gamlss_<ROI>_<METRIC_NAME>_<AGE_TERM>_S0_<PROTOCOL>_Cms_SHASH_fp_<NPOLY>.json
 
-// Each plotted set: { id, color, rois:[], metric, gender, label }
-let plotted = [];
+  Where:
+    METRIC_NAME  = bgpdwis_PA_{metric}_median
+    AGE_TERM     = 'Ams' for dti_* ; 'Am' for everything else
+    PROTOCOL     = 'Pm' for dki_ak and noddi_odi ; 'P0' for everything else
+    NPOLY        = 'npoly2' for dti_fa, dki_fa, dki_md ; 'npoly1' for everything else
 
-//////////////////////////////////////////////////////////
-// METRIC MAP (filename)
-//////////////////////////////////////////////////////////
+  BUT npoly can vary — so we look up in FILE_INDEX first, then fallback to hardcoded rules.
+*/
 
-const metricMap = {
+const METRIC_NAME_MAP = {
   dki_ak:    'bgpdwis_PA_dki_ak_median',
   dki_mk:    'bgpdwis_PA_dki_mk_median',
   dki_rk:    'bgpdwis_PA_dki_rk_median',
@@ -689,24 +743,102 @@ const metricMap = {
   noddi_fwf: 'bgpdwis_PA_noddi_fwf_median',
 };
 
-function buildJsonFilename(metric, roi) {
-  const metricName = metricMap[metric];
-  let ageTerm = 'Am';
-  if (metric.startsWith('dti_')) ageTerm = 'Ams';
-  let npoly = 'npoly1';
-  if (['dti_fa','dki_md','dki_fa'].includes(metric)) npoly = 'npoly2';
-  let protocol = 'P0';
-  if (metric === 'dki_ak') protocol = 'Pm';
-  return `gamlss_${roi}_${metricName}_${ageTerm}_S0_${protocol}_Cms_SHASH_fp_${npoly}.json`;
+function getAgeTerm(metric) {
+  return metric.startsWith('dti_') ? 'Ams' : 'Am';
 }
 
-async function loadCurve(metric, roi, gender = 'F') {
-  const filename = buildJsonFilename(metric, roi);
-  const response = await fetch(`curves/${filename}`);
-  if (!response.ok) throw new Error(`File not found:\n${filename}`);
-  const json = await response.json();
-  return json.data[gender];
+function getProtocol(metric) {
+  return (metric === 'dki_ak' || metric === 'noddi_odi') ? 'Pm' : 'P0';
 }
+
+function getNpoly(metric) {
+  // hardcoded defaults — overridden by index lookup
+  return (metric === 'dti_fa' || metric === 'dki_fa' || metric === 'dki_md') ? 'npoly2' : 'npoly1';
+}
+
+/**
+ * Build the JSON filename for a given ROI string + metric.
+ * If FILE_INDEX is populated, we search for the real filename by prefix match.
+ * This handles varying npoly, protocol, etc.
+ */
+function buildJsonFilename(metric, roi) {
+  const metricName = METRIC_NAME_MAP[metric];
+  if (!metricName) return null;
+
+  const ageTerm  = getAgeTerm(metric);
+  const protocol = getProtocol(metric);
+
+  // Build prefix that is stable regardless of npoly variation
+  // Pattern: gamlss_<ROI>_<metricName>_<ageTerm>_S0_<protocol>_Cms_SHASH_fp_
+  const stablePrefix = `gamlss_${roi}_${metricName}_${ageTerm}_S0_${protocol}_Cms_SHASH_fp_`;
+
+  // Try to find in index
+  if (FILE_INDEX.size > 0) {
+    for (const fname of FILE_INDEX) {
+      if (fname.startsWith(stablePrefix)) return fname;
+    }
+    // Not found in index
+    return null;
+  }
+
+  // Fallback: use hardcoded npoly
+  return `${stablePrefix}${getNpoly(metric)}.json`;
+}
+
+//////////////////////////////////////////////////////////
+// ROI STRING RESOLVER
+//////////////////////////////////////////////////////////
+
+function resolveRoiString(source, key, hemi) {
+  if (source === 'jhu') {
+    const base = `JHUICBMlabels1mm_warped_s_${key}`;
+    if (hemi === 'L') return `${base}_L_e1`;
+    if (hemi === 'R') return `${base}_R_e1`;
+    return `${base}_e1`;
+  }
+
+  if (source === 'tractseg') {
+    const isCC2 = key === 'CC';  // CC (all) uses tractseg2
+    const roiPrefix = isCC2 ? 'tractseg2' : 'tractseg';
+    const base = `${roiPrefix}_${key}`;
+    if (hemi === 'L') return `${base}_left_e1`;
+    if (hemi === 'R') return `${base}_right_e1`;
+    return `${base}_e1`;
+  }
+
+  if (source === 'mask') return 'bgpdwis_PA_geomcorr_mask3d_e1';
+
+  if (source === 'synthseg') {
+    const base = `bgpdwis_PA_geomcorr_maskseg_${key}`;
+    if (hemi === 'L') return `${base}_L_e1`;
+    if (hemi === 'R') return `${base}_R_e1`;
+    return `${base}_L_e1`;
+  }
+
+  return null;
+}
+
+function getRoiStrings(source, key, hemi, bilateral) {
+  if (!bilateral || hemi !== 'both') {
+    return [resolveRoiString(source, key, hemi)];
+  }
+  return [
+    resolveRoiString(source, key, 'L'),
+    resolveRoiString(source, key, 'R'),
+  ];
+}
+
+//////////////////////////////////////////////////////////
+// STATE
+//////////////////////////////////////////////////////////
+
+let selectedGender    = 'F';
+let selectedHemi      = 'L';
+let selectedMacro     = 'all';
+let allTraces         = [];
+let curveCount        = 0;
+let plotInitialized   = false;
+let plotted           = [];
 
 //////////////////////////////////////////////////////////
 // UI: GENDER
@@ -733,6 +865,19 @@ function setHemi(val) {
 }
 
 //////////////////////////////////////////////////////////
+// UI: MACRO GROUP FILTER
+//////////////////////////////////////////////////////////
+
+function setMacro(val) {
+  selectedMacro = val;
+  document.querySelectorAll('.macro-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.val === val);
+  });
+  populateRoiNames();
+  onRoiNameChange();
+}
+
+//////////////////////////////////////////////////////////
 // UI: SOURCE / ROI CHANGE
 //////////////////////////////////////////////////////////
 
@@ -745,20 +890,34 @@ function populateRoiNames() {
   const source = document.getElementById('roi-source').value;
   const rois   = ROI_CATALOGUE[source] || [];
   const sel    = document.getElementById('roi-name');
+  const macroMap = MACRO_MAP[source] || {};
 
-  // Deduplicate by key (tractseg CC_2 appears twice due to copy-paste in catalogue)
   const seen = new Set();
   sel.innerHTML = '';
+
   rois.forEach(r => {
-    const uid = r.key;
-    if (seen.has(uid)) return;
-    seen.add(uid);
+    if (seen.has(r.key)) return;
+    seen.add(r.key);
+
+    // Filter by macro group
+    if (selectedMacro !== 'all') {
+      const roiMacro = macroMap[r.key];
+      if (roiMacro !== selectedMacro) return;
+    }
+
     const opt = document.createElement('option');
     opt.value = r.key;
     opt.text  = r.label;
     opt.dataset.bilateral = r.bilateral ? '1' : '0';
     sel.appendChild(opt);
   });
+
+  if (sel.options.length === 0) {
+    const opt = document.createElement('option');
+    opt.text = '— no ROIs in this group —';
+    opt.disabled = true;
+    sel.appendChild(opt);
+  }
 
   updateHemiPills();
   updatePreview();
@@ -781,17 +940,11 @@ function updateHemiPills() {
   const pills = document.querySelectorAll('.hemi-pill');
 
   if (!bilateral) {
-    pills.forEach(p => {
-      p.disabled = true;
-      p.classList.remove('active');
-    });
+    pills.forEach(p => { p.disabled = true; p.classList.remove('active'); });
     selectedHemi = 'none';
   } else {
     pills.forEach(p => { p.disabled = false; });
-    // default to Left if coming from non-bilateral
-    if (selectedHemi === 'none') {
-      selectedHemi = 'L';
-    }
+    if (selectedHemi === 'none') selectedHemi = 'L';
     document.querySelectorAll('.hemi-pill').forEach(p => {
       p.classList.toggle('active', p.dataset.val === selectedHemi);
     });
@@ -801,15 +954,23 @@ function updateHemiPills() {
 }
 
 function updatePreview() {
-  const source  = document.getElementById('roi-source').value;
-  const entry   = getCurrentRoiEntry();
-  if (!entry) return;
+  const source = document.getElementById('roi-source').value;
+  const entry  = getCurrentRoiEntry();
+  if (!entry) { document.getElementById('roi-preview').innerHTML = '—'; return; }
 
+  const metric = document.getElementById('metricas').value;
   const rois = getRoiStrings(source, entry.key, selectedHemi, entry.bilateral);
-  const preview = document.getElementById('roi-preview');
-  preview.innerHTML = rois.map(r =>
-    `<span class="key">${r || '—'}</span>`
-  ).join('<br>');
+
+  const lines = rois.map(roi => {
+    const fname = buildJsonFilename(metric, roi);
+    if (!fname) return `<span class="warn">⚠ ${roi} — not in index</span>`;
+    if (FILE_INDEX.size > 0 && !FILE_INDEX.has(fname)) {
+      return `<span class="warn">⚠ ${fname}</span>`;
+    }
+    return `<span class="key">${fname}</span>`;
+  });
+
+  document.getElementById('roi-preview').innerHTML = lines.join('<br>');
 }
 
 //////////////////////////////////////////////////////////
@@ -819,7 +980,6 @@ function updatePreview() {
 function setStatus(msg, type = '') {
   const bar  = document.getElementById('status-bar');
   const text = document.getElementById('status-text');
-  bar.className = type ? `error ok loading`.split(' ').includes(type) ? '' : '' : '';
   bar.classList.remove('error','ok','loading');
   if (type) bar.classList.add(type);
   text.textContent = msg;
@@ -828,6 +988,18 @@ function setStatus(msg, type = '') {
 //////////////////////////////////////////////////////////
 // PLOT
 //////////////////////////////////////////////////////////
+
+async function loadCurve(filename, gender) {
+  const response = await fetch(`curves/${filename}`);
+  if (!response.ok) throw new Error(`File not found:\n${filename}`);
+  const json = await response.json();
+  return json.data[gender];
+}
+
+function hexToRgba(hsl, alpha) {
+  // hsl is like 'hsl(200,70%,45%)' — we'll just pass it through Plotly
+  return hsl.replace('hsl(', 'hsla(').replace(')', `,${alpha})`);
+}
 
 async function plotSelectedCurve() {
   const metric = document.getElementById('metricas').value;
@@ -839,69 +1011,151 @@ async function plotSelectedCurve() {
   const roiStrings = getRoiStrings(source, entry.key, selectedHemi, entry.bilateral);
 
   setStatus(`Loading ${roiStrings.length} curve(s)…`, 'loading');
+  document.getElementById('btn-plot').disabled = true;
 
   const hue   = (curveCount * 57) % 360;
-  const color = `hsl(${hue},70%,55%)`;
+  const color = `hsl(${hue},70%,40%)`;  // darker for light bg
   curveCount++;
 
   const newTraces = [];
   let loadedAll = true;
 
   for (const roi of roiStrings) {
+    const fname = buildJsonFilename(metric, roi);
+    if (!fname) {
+      setStatus(`No file found for ${roi} / ${metric}`, 'error');
+      loadedAll = false;
+      continue;
+    }
+
     const hemiLabel = roi.includes('_L_') || roi.includes('_left_') ? ' L'
                     : roi.includes('_R_') || roi.includes('_right_') ? ' R'
                     : '';
     const prefix = `${metric.toUpperCase()} | ${entry.label}${hemiLabel} | ${selectedGender}`;
 
     try {
-      const curve = await loadCurve(metric, roi, selectedGender);
+      const curve = await loadCurve(fname, selectedGender);
       const x = curve.grid;
 
-      newTraces.push(
-        { x, y: curve.P3,  mode:'lines', name:`${prefix} P3`,  line:{ dash:'dot', color, width:1  }, opacity:0.3 },
-        { x, y: curve.P15, mode:'lines', name:`${prefix} P15`, line:{ color, width:1 },              opacity:0.55 },
-        { x, y: curve.P50, mode:'lines', name:`${prefix} P50`, line:{ color, width:3 } },
-        { x, y: curve.P85, mode:'lines', name:`${prefix} P85`, line:{ color, width:1 },              opacity:0.55 },
-        { x, y: curve.P97, mode:'lines', name:`${prefix} P97`, line:{ dash:'dot', color, width:1  }, opacity:0.3 },
-      );
+      // Colors with varying opacity
+      const solid   = `hsl(${hue},70%,40%)`;
+      const mid     = `hsla(${hue},65%,45%,0.75)`;
+      const outer   = `hsla(${hue},60%,50%,0.45)`;
+      const fill3   = `hsla(${hue},60%,75%,0.15)`;
+      const fill15  = `hsla(${hue},60%,70%,0.20)`;
+
+      // P3 outer band fill (P3→P97 region, very faint)
+      newTraces.push({
+        x, y: curve.P97,
+        mode: 'lines', name: `${prefix} P97`,
+        line: { color: outer, width: 1, dash: 'dot' },
+        showlegend: false,
+      });
+      newTraces.push({
+        x, y: curve.P3,
+        fill: 'tonexty', fillcolor: fill3,
+        mode: 'lines', name: `${prefix} P3–P97`,
+        line: { color: outer, width: 1, dash: 'dot' },
+        showlegend: true,
+        legendgroup: prefix,
+      });
+
+      // P15→P85 inner band
+      newTraces.push({
+        x, y: curve.P85,
+        mode: 'lines', name: `${prefix} P85`,
+        line: { color: mid, width: 1.5 },
+        showlegend: false,
+        legendgroup: prefix,
+      });
+      newTraces.push({
+        x, y: curve.P15,
+        fill: 'tonexty', fillcolor: fill15,
+        mode: 'lines', name: `${prefix} P15–P85`,
+        line: { color: mid, width: 1.5 },
+        showlegend: false,
+        legendgroup: prefix,
+      });
+
+      // P50 median — prominent
+      newTraces.push({
+        x, y: curve.P50,
+        mode: 'lines', name: `${prefix} P50`,
+        line: { color: solid, width: 3 },
+        showlegend: false,
+        legendgroup: prefix,
+      });
+
     } catch (e) {
       setStatus(`Error: ${e.message}`, 'error');
       loadedAll = false;
     }
   }
 
+  document.getElementById('btn-plot').disabled = false;
+
   if (newTraces.length === 0) return;
 
-  // Register in plotted list
   const id = `curve-${Date.now()}`;
   const shortLabel = `${metric.toUpperCase()} · ${entry.label} · ${selectedGender}`;
   plotted.push({ id, color, traces: newTraces, label: shortLabel });
   allTraces.push(...newTraces);
 
   renderCurveList();
-  renderPlot();
+
+  // ── PERFORMANCE: use addTraces after first render instead of full redraw ──
+  if (!plotInitialized) {
+    renderPlotFull();
+    plotInitialized = true;
+  } else {
+    Plotly.addTraces('graph', newTraces);
+  }
 
   if (loadedAll) setStatus(`Plotted: ${shortLabel}`, 'ok');
 }
 
 //////////////////////////////////////////////////////////
-// RENDER PLOT
+// RENDER PLOT (full rebuild)
 //////////////////////////////////////////////////////////
 
-function renderPlot() {
-  const layout = {
-    paper_bgcolor: '#161b22',
-    plot_bgcolor:  '#161b22',
-    font:   { family: 'IBM Plex Sans, sans-serif', color: '#e6edf3', size: 12 },
-    title:  { text: 'Normative Centile Curves', font: { size: 18 }, x: 0.05 },
-    xaxis:  { title: 'Age (years)', gridcolor: '#30363d', zerolinecolor: '#30363d', color:'#7d8590' },
-    yaxis:  { title: 'Metric value', gridcolor: '#30363d', zerolinecolor: '#30363d', color:'#7d8590' },
-    hovermode: 'x unified',
-    legend: { orientation: 'h', y: -0.18, font: { size: 10 }, bgcolor: 'rgba(0,0,0,0)' },
-    margin: { t: 50, b: 60, l: 60, r: 20 },
-  };
+const LIGHT_LAYOUT = {
+  paper_bgcolor: '#ffffff',
+  plot_bgcolor:  '#f8f9fb',
+  font:   { family: 'IBM Plex Sans, sans-serif', color: '#22262e', size: 12 },
+  title:  { text: 'Normative Centile Curves', font: { size: 18, color: '#22262e' }, x: 0.05 },
+  xaxis:  {
+    title: 'Age (years)',
+    gridcolor: '#dde1e8',
+    zerolinecolor: '#ccd0d8',
+    color: '#444c5c',
+    linecolor: '#ccd0d8',
+    tickfont: { color: '#444c5c' },
+    showgrid: true,
+  },
+  yaxis:  {
+    title: 'Metric value',
+    gridcolor: '#dde1e8',
+    zerolinecolor: '#ccd0d8',
+    color: '#444c5c',
+    linecolor: '#ccd0d8',
+    tickfont: { color: '#444c5c' },
+    showgrid: true,
+  },
+  hovermode: 'x unified',
+  hoverlabel: { bgcolor: '#ffffff', bordercolor: '#aaa', font: { color: '#22262e', size: 11 } },
+  legend: {
+    orientation: 'h',
+    y: -0.18,
+    font: { size: 10, color: '#333' },
+    bgcolor: 'rgba(255,255,255,0.8)',
+    bordercolor: '#dde1e8',
+    borderwidth: 1,
+  },
+  margin: { t: 50, b: 80, l: 60, r: 20 },
+};
 
-  Plotly.react('graph', allTraces, layout, { responsive: true });
+function renderPlotFull() {
+  Plotly.react('graph', allTraces, LIGHT_LAYOUT, { responsive: true });
 }
 
 //////////////////////////////////////////////////////////
@@ -939,13 +1193,13 @@ function removeCurve(id) {
   const entry = plotted.find(p => p.id === id);
   if (!entry) return;
 
-  // Remove its traces from allTraces
   const traceSet = new Set(entry.traces);
   allTraces = allTraces.filter(t => !traceSet.has(t));
   plotted   = plotted.filter(p => p.id !== id);
 
   renderCurveList();
-  renderPlot();
+  // Full redraw needed after removal (indices shift)
+  renderPlotFull();
   setStatus('Curve removed.', '');
 }
 
@@ -957,11 +1211,9 @@ function clearPlot() {
   allTraces = [];
   plotted   = [];
   curveCount = 0;
+  plotInitialized = false;
   renderCurveList();
-  Plotly.react('graph', [], {
-    paper_bgcolor: '#161b22',
-    plot_bgcolor:  '#161b22',
-  }, { responsive: true });
+  Plotly.react('graph', [], LIGHT_LAYOUT, { responsive: true });
   setStatus('Plot cleared.', '');
 }
 
@@ -969,8 +1221,11 @@ function clearPlot() {
 // INIT
 //////////////////////////////////////////////////////////
 
-populateRoiNames();
-setStatus('Ready. Select a metric and ROI, then click Plot.', '');
+// Kick off — load file index, then populate UI
+loadFileIndex();
+
+// Update preview when metric changes (npoly may differ)
+document.getElementById('metricas').addEventListener('change', updatePreview);
 
 </script>
 </body>
