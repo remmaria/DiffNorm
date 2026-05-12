@@ -543,8 +543,65 @@ select optgroup { background: #161b22; font-weight: 600; }
       </div>
     </div>
 
+    <hr class="divider">
+
+    <!-- CURVE MODE -->
+    <div class="field-group">
+
+    <div class="section-label">Curve Mode</div>
+
+    <div class="gender-pills">
+
+        <button class="gender-pill active-F"
+                id="mode-percentile"
+                onclick="setCurveMode('percentile')">
+
+        Percentiles
+
+        </button>
+
+        <button class="gender-pill"
+                id="mode-zscore"
+                onclick="setCurveMode('zscore')">
+
+        Z-Scores
+
+        </button>
+
+    </div>
+
+    </div>
+
+    <!-- CURVE OPTIONS -->
+    <div class="field-group">
+
+    <div class="section-label">Curve Options</div>
+
+    <label style="margin-bottom:6px;">
+        <input type="checkbox" id="showOuter" checked>
+        Outer curves (P3/P97 or Z±2)
+    </label>
+
+    <label style="margin-bottom:6px;">
+        <input type="checkbox" id="showInner" checked>
+        Inner curves (P15/P85 or Z±1)
+    </label>
+
+    <label style="margin-bottom:6px;">
+        <input type="checkbox" id="showMedian" checked>
+        Median / Z0
+    </label>
+
+    <label>
+        <input type="checkbox" id="showShade" checked>
+        Shade between curves
+    </label>
+
+    </div>
+
   </div><!-- /sidebar -->
 
+ 
   <!-- ── GRAPH AREA ── -->
   <div class="graph-area">
     <div id="graph"></div>
@@ -790,29 +847,78 @@ function buildJsonFilename(metric, roi) {
 //////////////////////////////////////////////////////////
 
 function resolveRoiString(source, key, hemi) {
+
+  //////////////////////////////////////////////////////
+  // JHU
+  //////////////////////////////////////////////////////
+
   if (source === 'jhu') {
+
     const base = `JHUICBMlabels1mm_warped_s_${key}`;
+
     if (hemi === 'L') return `${base}_L_e1`;
     if (hemi === 'R') return `${base}_R_e1`;
+
     return `${base}_e1`;
   }
+
+  //////////////////////////////////////////////////////
+  // TRACTSEG
+  //////////////////////////////////////////////////////
 
   if (source === 'tractseg') {
-    const isCC2 = key === 'CC';  // CC (all) uses tractseg2
+
+    const isCC2 = key === 'CC';
     const roiPrefix = isCC2 ? 'tractseg2' : 'tractseg';
+
     const base = `${roiPrefix}_${key}`;
+
     if (hemi === 'L') return `${base}_left_e1`;
     if (hemi === 'R') return `${base}_right_e1`;
+
     return `${base}_e1`;
   }
 
-  if (source === 'mask') return 'bgpdwis_PA_geomcorr_mask3d_e1';
+  //////////////////////////////////////////////////////
+  // WHOLE BRAIN MASK
+  //////////////////////////////////////////////////////
+
+  if (source === 'mask') {
+    return 'bgpdwis_PA_geomcorr_mask3d_e1';
+  }
+
+  //////////////////////////////////////////////////////
+  // SYNTHSEG
+  //////////////////////////////////////////////////////
 
   if (source === 'synthseg') {
+
     const base = `bgpdwis_PA_geomcorr_maskseg_${key}`;
-    if (hemi === 'L') return `${base}_L_e1`;
-    if (hemi === 'R') return `${base}_R_e1`;
-    return `${base}_L_e1`;
+
+    // bilateral structures
+    const bilateralStructures = [
+      'CbllWM',
+      'CbWM',
+      'Ctx',
+      'Hipp',
+      'SubCtx'
+    ];
+
+    const isBilateral = bilateralStructures.includes(key);
+
+    // left/right available
+    if (isBilateral) {
+
+      if (hemi === 'L') return `${base}_L_e1`;
+
+      if (hemi === 'R') return `${base}_R_e1`;
+
+      // BOTH
+      return `${base}_e1`;
+    }
+
+    // fallback
+    return `${base}_e1`;
   }
 
   return null;
@@ -833,12 +939,13 @@ function getRoiStrings(source, key, hemi, bilateral) {
 //////////////////////////////////////////////////////////
 
 let selectedGender    = 'F';
-let selectedHemi      = 'L';
+let selectedHemi      = 'both';
 let selectedMacro     = 'all';
 let allTraces         = [];
 let curveCount        = 0;
 let plotInitialized   = false;
 let plotted           = [];
+let curveMode = 'percentile';
 
 //////////////////////////////////////////////////////////
 // UI: GENDER
@@ -850,6 +957,35 @@ function setGender(val) {
     p.className = 'gender-pill';
     if (p.dataset.val === val) p.classList.add(`active-${val}`);
   });
+}
+
+//////////////////////////////////////////////////////////
+// UI: CURVE MODE
+//////////////////////////////////////////////////////////
+
+function setCurveMode(mode) {
+
+  curveMode = mode;
+
+  document
+    .getElementById('mode-percentile')
+    .classList.remove('active-F');
+
+  document
+    .getElementById('mode-zscore')
+    .classList.remove('active-M');
+
+  if (mode === 'percentile') {
+    document
+      .getElementById('mode-percentile')
+      .classList.add('active-F');
+  }
+
+  if (mode === 'zscore') {
+    document
+      .getElementById('mode-zscore')
+      .classList.add('active-M');
+  }
 }
 
 //////////////////////////////////////////////////////////
@@ -1044,47 +1180,225 @@ async function plotSelectedCurve() {
       const fill3   = `hsla(${hue},60%,75%,0.15)`;
       const fill15  = `hsla(${hue},60%,70%,0.20)`;
 
-      // P3 outer band fill (P3→P97 region, very faint)
-      newTraces.push({
-        x, y: curve.P97,
-        mode: 'lines', name: `${prefix} P97`,
-        line: { color: outer, width: 1, dash: 'dot' },
-        showlegend: false,
-      });
-      newTraces.push({
-        x, y: curve.P3,
-        fill: 'tonexty', fillcolor: fill3,
-        mode: 'lines', name: `${prefix} P3–P97`,
-        line: { color: outer, width: 1, dash: 'dot' },
-        showlegend: true,
-        legendgroup: prefix,
-      });
+      const showOuter  = document.getElementById('showOuter').checked;
+const showInner  = document.getElementById('showInner').checked;
+const showMedian = document.getElementById('showMedian').checked;
+const showShade  = document.getElementById('showShade').checked;
 
-      // P15→P85 inner band
-      newTraces.push({
-        x, y: curve.P85,
-        mode: 'lines', name: `${prefix} P85`,
-        line: { color: mid, width: 1.5 },
-        showlegend: false,
-        legendgroup: prefix,
-      });
-      newTraces.push({
-        x, y: curve.P15,
-        fill: 'tonexty', fillcolor: fill15,
-        mode: 'lines', name: `${prefix} P15–P85`,
-        line: { color: mid, width: 1.5 },
-        showlegend: false,
-        legendgroup: prefix,
-      });
+//////////////////////////////////////////////////////////
+// PERCENTILES
+//////////////////////////////////////////////////////////
 
-      // P50 median — prominent
-      newTraces.push({
-        x, y: curve.P50,
-        mode: 'lines', name: `${prefix} P50`,
-        line: { color: solid, width: 3 },
+if (curveMode === 'percentile') {
+
+  // OUTER
+  if (showOuter && curve.P3 && curve.P97) {
+
+    newTraces.push({
+      x,
+      y: curve.P97,
+      mode: 'lines',
+      line: {
+        color: outer,
+        width: 1,
+        dash: 'dot'
+      },
+      showlegend: false,
+      legendgroup: prefix,
+    });
+
+    newTraces.push({
+      x,
+      y: curve.P3,
+      mode: 'lines',
+
+      fill: showShade ? 'tonexty' : undefined,
+      fillcolor: fill3,
+
+      line: {
+        color: outer,
+        width: 1,
+        dash: 'dot'
+      },
+
+      name: `${prefix} P3/P97`,
+      legendgroup: prefix,
+    });
+  }
+
+  // INNER
+  if (showInner && curve.P15 && curve.P85) {
+
+    newTraces.push({
+      x,
+      y: curve.P85,
+      mode: 'lines',
+      line: {
+        color: mid,
+        width: 1.5
+      },
+      showlegend: false,
+      legendgroup: prefix,
+    });
+
+    newTraces.push({
+      x,
+      y: curve.P15,
+      mode: 'lines',
+
+      fill: showShade ? 'tonexty' : undefined,
+      fillcolor: fill15,
+
+      line: {
+        color: mid,
+        width: 1.5
+      },
+
+      name: `${prefix} P15/P85`,
+      legendgroup: prefix,
+    });
+  }
+
+  // MEDIAN
+  if (showMedian && curve.P50) {
+
+    newTraces.push({
+      x,
+      y: curve.P50,
+      mode: 'lines',
+
+      line: {
+        color: solid,
+        width: 3
+      },
+
+      name: `${prefix} P50`,
+      legendgroup: prefix,
+    });
+  }
+}
+
+
+//////////////////////////////////////////////////////////
+// Z-SCORES
+//////////////////////////////////////////////////////////
+
+if (curveMode === 'zscore') {
+
+    const Zm3 = curve['z-3'];
+    const Zm2 = curve['z-2'];
+    const Zm1 = curve['z-1'];
+
+    const Z0  = curve['z0'];
+
+    const Z1  = curve['z1'];
+    const Z2  = curve['z2'];
+    const Z3  = curve['z3'];
+
+    //////////////////////////////////////////////////////
+    // OUTER BAND  (Z-2 / Z+2)
+    //////////////////////////////////////////////////////
+
+    if (showOuter && Zm2 && Z2) {
+
+        newTraces.push({
+        x,
+        y: Z2,
+
+        mode: 'lines',
+
+        line: {
+            color: outer,
+            width: 1,
+            dash: 'dot'
+        },
+
         showlegend: false,
         legendgroup: prefix,
-      });
+        });
+
+        newTraces.push({
+        x,
+        y: Zm2,
+
+        mode: 'lines',
+
+        fill: showShade ? 'tonexty' : undefined,
+        fillcolor: fill3,
+
+        line: {
+            color: outer,
+            width: 1,
+            dash: 'dot'
+        },
+
+        name: `${prefix} Z±2`,
+        legendgroup: prefix,
+        });
+    }
+
+    //////////////////////////////////////////////////////
+    // INNER BAND  (Z-1 / Z+1)
+    //////////////////////////////////////////////////////
+
+    if (showInner && Zm1 && Z1) {
+
+        newTraces.push({
+        x,
+        y: Z1,
+
+        mode: 'lines',
+
+        line: {
+            color: mid,
+            width: 1.5
+        },
+
+        showlegend: false,
+        legendgroup: prefix,
+        });
+
+        newTraces.push({
+        x,
+        y: Zm1,
+
+        mode: 'lines',
+
+        fill: showShade ? 'tonexty' : undefined,
+        fillcolor: fill15,
+
+        line: {
+            color: mid,
+            width: 1.5
+        },
+
+        name: `${prefix} Z±1`,
+        legendgroup: prefix,
+        });
+    }
+
+    //////////////////////////////////////////////////////
+    // MEDIAN (Z0)
+    //////////////////////////////////////////////////////
+
+    if (showMedian && Z0) {
+
+        newTraces.push({
+        x,
+        y: Z0,
+
+        mode: 'lines',
+
+        line: {
+            color: solid,
+            width: 3
+        },
+
+        name: `${prefix} Z0`,
+        legendgroup: prefix,
+        });
+    }
+    }
 
     } catch (e) {
       setStatus(`Error: ${e.message}`, 'error');
@@ -1141,7 +1455,7 @@ const LIGHT_LAYOUT = {
     tickfont: { color: '#444c5c' },
     showgrid: true,
   },
-  hovermode: 'x unified',
+  hovermode: 'closest',
   hoverlabel: { bgcolor: '#ffffff', bordercolor: '#aaa', font: { color: '#22262e', size: 11 } },
   legend: {
     orientation: 'h',
