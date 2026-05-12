@@ -3,494 +3,975 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <title>7TBRP Diffusion MRI Normative Charts</title>
-
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-
-body{
-    font-family: Arial, sans-serif;
-    margin:0;
-    background:#f5f6fa;
-    color:#333;
+:root {
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --surface2:  #1e2631;
+  --border:    #30363d;
+  --accent:    #58a6ff;
+  --accent2:   #3fb950;
+  --accent3:   #f78166;
+  --text:      #e6edf3;
+  --text-muted:#7d8590;
+  --text-dim:  #484f58;
+  --radius:    8px;
 }
 
-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    background:#2c3e50;
-    color:white;
-    padding:15px 20px;
-    height:70px;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-header span{
-    flex:1;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
+/* ── HEADER ─────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 64px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.logo-left,
-.logo-right{
-    height:60px;
+.header-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
-.container{
-    display:flex;
-    flex-wrap:wrap;
-    gap:20px;
-    padding:20px;
+.header-title .main {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
 }
 
-.panel{
-    width:420px;
-    background:white;
-    padding:15px;
-    border-radius:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+.header-title .sub {
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
 }
 
-.graph-container{
-    flex:1;
-    min-width:700px;
-    background:white;
-    border-radius:10px;
-    padding:10px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.1);
+.logo-left, .logo-right { height: 38px; flex-shrink: 0; }
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
 }
 
-select{
-    width:100%;
-    margin-bottom:15px;
-    padding:5px;
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px 16px 24px;
+  gap: 20px;
 }
 
-button{
-    width:100%;
-    padding:10px;
-    border:none;
-    border-radius:8px;
-    background:#2c3e50;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
+.section-label {
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
 }
 
-button:hover{
-    background:#1a252f;
+/* ── FIELD GROUPS ────────────────────────────────────── */
+.field-group { display: flex; flex-direction: column; }
+
+/* ── CUSTOM SELECT ───────────────────────────────────── */
+.select-wrap {
+  position: relative;
 }
 
-#graph{
-    width:100%;
-    height:90vh;
+.select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  font-size: 12px;
 }
 
+select {
+  appearance: none;
+  width: 100%;
+  padding: 8px 28px 8px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(88,166,255,0.15);
+}
+
+select option { background: #1e2631; }
+select optgroup { background: #161b22; font-weight: 600; }
+
+/* ── GENDER PILLS ────────────────────────────────────── */
+.gender-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.gender-pill {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.gender-pill:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.gender-pill.active-F {
+  background: rgba(88,166,255,0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.gender-pill.active-M {
+  background: rgba(63,185,80,0.12);
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+
+/* ── HEMISPHERE PILLS ────────────────────────────────── */
+.hemi-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.hemi-pill {
+  flex: 1;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+
+.hemi-pill:hover:not(:disabled) {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.hemi-pill.active {
+  background: rgba(247,129,102,0.12);
+  border-color: var(--accent3);
+  color: var(--accent3);
+}
+
+.hemi-pill:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── ROI PREVIEW TAG ─────────────────────────────────── */
+#roi-preview {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-top: 8px;
+  min-height: 28px;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+#roi-preview span.key {
+  color: var(--accent);
+}
+
+/* ── DIVIDER ─────────────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+/* ── BUTTONS ─────────────────────────────────────────── */
+.btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #0d1117;
+}
+
+.btn-primary:hover { background: #79b8ff; transform: translateY(-1px); }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover { color: var(--accent3); border-color: var(--accent3); }
+
+.btn-row { display: flex; gap: 8px; }
+.btn-row .btn { flex: 1; }
+
+/* ── ACTIVE CURVES LIST ──────────────────────────────── */
+#curve-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.curve-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text-muted);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+
+.curve-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.curve-tag-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.curve-remove {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.curve-remove:hover { color: var(--accent3); }
+
+#no-curves {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-style: italic;
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* ── MAIN GRAPH ──────────────────────────────────────── */
+.graph-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 16px;
+  gap: 12px;
+}
+
+#graph {
+  flex: 1;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* ── STATUS BAR ──────────────────────────────────────── */
+#status-bar {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#status-bar.error { color: var(--accent3); border-color: rgba(247,129,102,0.3); }
+#status-bar.ok    { color: var(--accent2); border-color: rgba(63,185,80,0.3); }
+#status-bar.loading { color: var(--accent); }
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 </style>
 </head>
 
 <body>
 
 <header>
-    <img src="assets/logo_Pitt_neg.png" class="logo-left">
-
-    <span>7TBRP Diffusion MRI Normative Charts</span>
-
-    <img src="assets/logo_USP_EESC_neg.png" class="logo-right">
+  <img src="assets/logo_Pitt_neg.png" class="logo-left" onerror="this.style.display='none'">
+  <div class="header-title">
+    <span class="main">7TBRP Diffusion MRI — Normative Charts</span>
+    <span class="sub">GAMLSS · SHASH · Age-based centile curves</span>
+  </div>
+  <img src="assets/logo_USP_EESC_neg.png" class="logo-right" onerror="this.style.display='none'">
 </header>
 
-<div class="container">
+<div class="layout">
 
-    <div class="panel">
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar">
 
-        <!-- GENDER -->
-        <label><b>Gender</b></label>
+    <!-- GENDER -->
+    <div class="field-group">
+      <div class="section-label">Sex</div>
+      <div class="gender-pills">
+        <button class="gender-pill active-F" data-val="F" onclick="setGender('F')">♀ Female</button>
+        <button class="gender-pill" data-val="M" onclick="setGender('M')">♂ Male</button>
+      </div>
+    </div>
 
-        <select id="gender">
+    <hr class="divider">
 
-            <option value="F" selected>Female</option>
-            <option value="M">Male</option>
-
-        </select>
-
-        <!-- METRICS -->
-        <label><b>Metric</b></label>
-
+    <!-- METRIC -->
+    <div class="field-group">
+      <div class="section-label">Metric</div>
+      <div class="select-wrap">
         <select id="metricas">
-
-            <optgroup label="DTI">
-                <option value="dti_fa">DTI-FA</option>
-                <option value="dti_ad">DTI-AD</option>
-                <option value="dti_md">DTI-MD</option>
-                <option value="dti_rd">DTI-RD</option>
-            </optgroup>
-
-            <optgroup label="DKI">
-                <option value="dki_ak" selected>DKI-AK</option>
-                <option value="dki_mk">DKI-MK</option>
-                <option value="dki_rk">DKI-RK</option>
-            </optgroup>
-
-            <optgroup label="NODDI">
-                <option value="noddi_odi">NODDI-ODI</option>
-                <option value="noddi_ndi">NODDI-NDI</option>
-                <option value="noddi_fwf">NODDI-FWF</option>
-            </optgroup>
-
+          <optgroup label="DTI">
+            <option value="dti_fa">DTI — FA (Fractional Anisotropy)</option>
+            <option value="dti_ad">DTI — AD (Axial Diffusivity)</option>
+            <option value="dti_md">DTI — MD (Mean Diffusivity)</option>
+            <option value="dti_rd">DTI — RD (Radial Diffusivity)</option>
+          </optgroup>
+          <optgroup label="DKI">
+            <option value="dki_ak" selected>DKI — AK (Axial Kurtosis)</option>
+            <option value="dki_mk">DKI — MK (Mean Kurtosis)</option>
+            <option value="dki_rk">DKI — RK (Radial Kurtosis)</option>
+          </optgroup>
+          <optgroup label="NODDI">
+            <option value="noddi_odi">NODDI — ODI</option>
+            <option value="noddi_ndi">NODDI — NDI</option>
+            <option value="noddi_fwf">NODDI — FWF</option>
+          </optgroup>
         </select>
-
-        <!-- ROI -->
-        <label><b>ROI</b></label>
-
-        <select id="rois">
-
-            <option value="mask3d_e1" selected>
-                Brain
-            </option>
-
-            <option value="tractseg_AF_left">
-                TractSeg AF Left
-            </option>
-
-        </select>
-
-        <button onclick="plotSelectedCurve()">
-            Plot Curve
-        </button>
-        <button onclick="clearPlot()">
-            Clear Plot
-        </button>
-
+      </div>
     </div>
 
+    <hr class="divider">
 
-
-    <div class="graph-container">
-
-        <div id="graph"></div>
-
+    <!-- ROI SOURCE -->
+    <div class="field-group">
+      <div class="section-label">ROI Atlas / Source</div>
+      <div class="select-wrap">
+        <select id="roi-source" onchange="onSourceChange()">
+          <option value="jhu">JHU White Matter Atlas</option>
+          <option value="tractseg">TractSeg</option>
+          <option value="mask">Brain Mask</option>
+          <option value="synthseg">SynthSeg</option>
+        </select>
+      </div>
     </div>
 
-</div>
+    <!-- ROI NAME -->
+    <div class="field-group">
+      <div class="section-label">Region of Interest</div>
+      <div class="select-wrap">
+        <select id="roi-name" onchange="onRoiNameChange()"></select>
+      </div>
+    </div>
+
+    <!-- HEMISPHERE -->
+    <div class="field-group" id="hemi-group">
+      <div class="section-label">Hemisphere</div>
+      <div class="hemi-pills">
+        <button class="hemi-pill active" data-val="both" onclick="setHemi('both')">Both</button>
+        <button class="hemi-pill" data-val="L" onclick="setHemi('L')">Left</button>
+        <button class="hemi-pill" data-val="R" onclick="setHemi('R')">Right</button>
+      </div>
+    </div>
+
+    <!-- ROI PREVIEW -->
+    <div id="roi-preview">—</div>
+
+    <hr class="divider">
+
+    <!-- ACTIONS -->
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="plotSelectedCurve()">
+        ＋ Plot
+      </button>
+      <button class="btn btn-ghost" onclick="clearPlot()">
+        ✕ Clear
+      </button>
+    </div>
+
+    <hr class="divider">
+
+    <!-- CURVE LIST -->
+    <div class="field-group">
+      <div class="section-label">Plotted curves</div>
+      <div id="curve-list">
+        <div id="no-curves">No curves plotted yet.</div>
+      </div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ── GRAPH AREA ── -->
+  <div class="graph-area">
+    <div id="graph"></div>
+    <div id="status-bar">
+      <span class="status-dot"></span>
+      <span id="status-text">Ready.</span>
+    </div>
+  </div>
+
+</div><!-- /layout -->
 
 <script>
 
+//////////////////////////////////////////////////////////
+// DATA: ROI CATALOGUE
+// Maps source → list of { label, key, bilateral }
+// key is the middle part of the ROI filename
+//////////////////////////////////////////////////////////
+
+const ROI_CATALOGUE = {
+
+  jhu: [
+    { label: "Anterior Corona Radiata",        key: "ACR",    bilateral: true  },
+    { label: "Anterior Limb of Int. Capsule",  key: "ALIC",   bilateral: true  },
+    { label: "Body of Corpus Callosum",        key: "BCC",    bilateral: false },
+    { label: "Corpus Callosum",                key: "CC",     bilateral: false },
+    { label: "Cingulum (cingulate gyrus)",     key: "CGC",    bilateral: true  },
+    { label: "Cingulum (hippocampus)",         key: "CGH",    bilateral: true  },
+    { label: "Cerebral Peduncle",              key: "CP",     bilateral: true  },
+    { label: "Corticospinal Tract",            key: "CST",    bilateral: true  },
+    { label: "External Capsule",               key: "EC",     bilateral: true  },
+    { label: "Fornix (cres) / Stria terminalis", key: "FX_ST", bilateral: true },
+    { label: "Fornix",                         key: "FX",     bilateral: false },
+    { label: "Genu of Corpus Callosum",        key: "GCC",    bilateral: false },
+    { label: "Inferior Cerebellar Peduncle",   key: "ICP",    bilateral: true  },
+    { label: "Middle Cerebellar Peduncle",     key: "MCP",    bilateral: false },
+    { label: "Medial Lemniscus",               key: "ML",     bilateral: true  },
+    { label: "Posterior Corona Radiata",       key: "PCR",    bilateral: true  },
+    { label: "Pontine Crossing Tract",         key: "PCT",    bilateral: false },
+    { label: "Post. Limb of Int. Capsule",     key: "PLIC",   bilateral: true  },
+    { label: "Post. Thalamic Radiation",       key: "PTR",    bilateral: true  },
+    { label: "Retrolenticular Int. Capsule",   key: "RLIC",   bilateral: true  },
+    { label: "Splenium of Corpus Callosum",    key: "SCC",    bilateral: false },
+    { label: "Superior Cerebellar Peduncle",   key: "SCP",    bilateral: true  },
+    { label: "Superior Corona Radiata",        key: "SCR",    bilateral: true  },
+    { label: "Superior Fronto-Occipital Fasc.",key: "SFO",    bilateral: true  },
+    { label: "Superior Longitudinal Fasc.",    key: "SLF",    bilateral: true  },
+    { label: "Sagittal Stratum",               key: "SS",     bilateral: true  },
+    { label: "Tapetum",                        key: "TAP",    bilateral: true  },
+    { label: "Uncinate Fasciculus",            key: "UF",     bilateral: true  },
+  ],
+
+  tractseg: [
+    { label: "Arcuate Fasciculus",                   key: "AF",         bilateral: true  },
+    { label: "Anterior Thalamic Radiation",          key: "ATR",        bilateral: true  },
+    { label: "Commissure Anterior",                  key: "CA",         bilateral: false },
+    { label: "Corpus Callosum (TractSeg)",           key: "CC",         bilateral: false },
+    { label: "Corpus Callosum (CC_2)",               key: "CC_2",       bilateral: false },
+    { label: "CC — 1: Rostrum",                      key: "CC_1",       bilateral: false },
+    { label: "CC — 2: Genu",                         key: "CC_2",       bilateral: false },
+    { label: "CC — 3: Rostral Body",                 key: "CC_3",       bilateral: false },
+    { label: "CC — 4: Ant. Midbody (Motor)",         key: "CC_4",       bilateral: false },
+    { label: "CC — 5: Post. Midbody (Sensory)",      key: "CC_5",       bilateral: false },
+    { label: "CC — 6: Isthmus",                      key: "CC_6",       bilateral: false },
+    { label: "CC — 7: Splenium",                     key: "CC_7",       bilateral: false },
+    { label: "Cingulum",                             key: "CG",         bilateral: true  },
+    { label: "Corticospinal Tract",                  key: "CST",        bilateral: true  },
+    { label: "Fronto-Pontine Tract",                 key: "FPT",        bilateral: true  },
+    { label: "Fornix",                               key: "FX",         bilateral: true  },
+    { label: "Inferior Cerebellar Peduncle",         key: "ICP",        bilateral: true  },
+    { label: "Inf. Occipito-Frontal Fasciculus",     key: "IFO",        bilateral: true  },
+    { label: "Inferior Longitudinal Fasciculus",     key: "ILF",        bilateral: true  },
+    { label: "Middle Cerebellar Peduncle",           key: "MCP",        bilateral: false },
+    { label: "Middle Longitudinal Fasciculus",       key: "MLF",        bilateral: true  },
+    { label: "Optic Radiation",                      key: "OR",         bilateral: true  },
+    { label: "Parieto-Occipital Pontine",            key: "POPT",       bilateral: true  },
+    { label: "Superior Cerebellar Peduncle",         key: "SCP",        bilateral: true  },
+    { label: "Superior Long. Fasciculus I",          key: "SLF_I",      bilateral: true  },
+    { label: "Superior Long. Fasciculus II",         key: "SLF_II",     bilateral: true  },
+    { label: "Superior Long. Fasciculus III",        key: "SLF_III",    bilateral: true  },
+    { label: "Superior Thalamic Radiation",          key: "STR",        bilateral: true  },
+    { label: "Striato-Fronto-Orbital",               key: "ST_FO",      bilateral: true  },
+    { label: "Striato-Occipital",                    key: "ST_OCC",     bilateral: true  },
+    { label: "Striato-Parietal",                     key: "ST_PAR",     bilateral: true  },
+    { label: "Striato-Postcentral",                  key: "ST_POSTC",   bilateral: true  },
+    { label: "Striato-Precentral",                   key: "ST_PREC",    bilateral: true  },
+    { label: "Striato-Prefrontal",                   key: "ST_PREF",    bilateral: true  },
+    { label: "Striato-Premotor",                     key: "ST_PREM",    bilateral: true  },
+    { label: "Thalamo-Occipital",                    key: "T_OCC",      bilateral: true  },
+    { label: "Thalamo-Parietal",                     key: "T_PAR",      bilateral: true  },
+    { label: "Thalamo-Postcentral",                  key: "T_POSTC",    bilateral: true  },
+    { label: "Thalamo-Precentral",                   key: "T_PREC",     bilateral: true  },
+    { label: "Thalamo-Prefrontal",                   key: "T_PREF",     bilateral: true  },
+    { label: "Thalamo-Premotor",                     key: "T_PREM",     bilateral: true  },
+    { label: "Uncinate Fasciculus",                  key: "UF",         bilateral: true  },
+  ],
+
+  mask: [
+    { label: "Whole Brain Mask", key: "mask3d", bilateral: false },
+  ],
+
+  synthseg: [
+    { label: "Cerebellar WM (CbWM)",           key: "CbWM",     bilateral: true  },
+    { label: "Cerebellar WM (CbllWM)",         key: "CbllWM",   bilateral: true  },
+    { label: "Cortex",                         key: "Ctx",      bilateral: true  },
+    { label: "Hippocampus",                    key: "Hipp",     bilateral: true  },
+    { label: "Subcortical",                    key: "SubCtx",   bilateral: true  },
+  ],
+};
+
+// Maps source + key + hemi → actual ROI string in available_rois.json
+function resolveRoiString(source, key, hemi) {
+  if (source === 'jhu') {
+    const base = `JHUICBMlabels1mm_warped_s_${key}`;
+    if (hemi === 'both' || hemi === 'L') {
+      // For bilateral we just return one; caller handles both
+    }
+    if (hemi === 'L') return `${base}_L_e1`;
+    if (hemi === 'R') return `${base}_R_e1`;
+    // non-bilateral
+    return `${base}_e1`;
+  }
+
+  if (source === 'tractseg') {
+    const prefix = key.startsWith('CC') && key !== 'CST' && key !== 'CGC' && key !== 'CG'
+      ? (key === 'CC' ? 'tractseg2' : 'tractseg')
+      : 'tractseg';
+    const base = key === 'CC' ? `tractseg2_CC` : `tractseg_${key}`;
+    if (hemi === 'L') return `${base}_left_e1`;
+    if (hemi === 'R') return `${base}_right_e1`;
+    // non-bilateral
+    return `${base}_e1`;
+  }
+
+  if (source === 'mask') {
+    return 'bgpdwis_PA_geomcorr_mask3d_e1';
+  }
+
+  if (source === 'synthseg') {
+    const base = `bgpdwis_PA_geomcorr_maskseg_${key}`;
+    if (hemi === 'L') return `${base}_L_e1`;
+    if (hemi === 'R') return `${base}_R_e1`;
+    // shouldn't reach here
+    return `${base}_L_e1`;
+  }
+
+  return null;
+}
+
+// Returns array of ROI strings to plot (1 or 2 for "both")
+function getRoiStrings(source, key, hemi, bilateral) {
+  if (!bilateral || hemi !== 'both') {
+    return [resolveRoiString(source, key, hemi)];
+  }
+  return [
+    resolveRoiString(source, key, 'L'),
+    resolveRoiString(source, key, 'R'),
+  ];
+}
 
 //////////////////////////////////////////////////////////
-// GLOBAL STORAGE
+// STATE
 //////////////////////////////////////////////////////////
 
-let allTraces = [];
-let curveCount = 0;
+let selectedGender = 'F';
+let selectedHemi   = 'L';
+let allTraces      = [];
+let curveCount     = 0;
+
+// Each plotted set: { id, color, rois:[], metric, gender, label }
+let plotted = [];
 
 //////////////////////////////////////////////////////////
-// MAPS
+// METRIC MAP (filename)
 //////////////////////////////////////////////////////////
 
 const metricMap = {
-
-    dki_ak: 'bgpdwis_PA_dki_ak_median',
-    dki_mk: 'bgpdwis_PA_dki_mk_median',
-    dki_rk: 'bgpdwis_PA_dki_rk_median',
-    dki_fa: 'bgpdwis_PA_dki_fa_median',
-    dki_md: 'bgpdwis_PA_dki_md_median',
-
-    dti_fa: 'bgpdwis_PA_dti_fa_median',
-    dti_ad: 'bgpdwis_PA_dti_ad_median',
-    dti_md: 'bgpdwis_PA_dti_md_median',
-    dti_rd: 'bgpdwis_PA_dti_rd_median',
-
-    noddi_odi: 'bgpdwis_PA_noddi_odi_median',
-    noddi_ndi: 'bgpdwis_PA_noddi_ndi_median'
+  dki_ak:    'bgpdwis_PA_dki_ak_median',
+  dki_mk:    'bgpdwis_PA_dki_mk_median',
+  dki_rk:    'bgpdwis_PA_dki_rk_median',
+  dki_fa:    'bgpdwis_PA_dki_fa_median',
+  dki_md:    'bgpdwis_PA_dki_md_median',
+  dti_fa:    'bgpdwis_PA_dti_fa_median',
+  dti_ad:    'bgpdwis_PA_dti_ad_median',
+  dti_md:    'bgpdwis_PA_dti_md_median',
+  dti_rd:    'bgpdwis_PA_dti_rd_median',
+  noddi_odi: 'bgpdwis_PA_noddi_odi_median',
+  noddi_ndi: 'bgpdwis_PA_noddi_ndi_median',
+  noddi_fwf: 'bgpdwis_PA_noddi_fwf_median',
 };
 
-const roiMap = {};
-
-//////////////////////////////////////////////////////////
-// BUILD JSON FILENAME
-//////////////////////////////////////////////////////////
-
-function buildJsonFilename(metric, roi){
-
-    const metricName = metricMap[metric];
-
-    const roiName = roi;
-
-    let ageTerm = 'Am';
-
-    if(metric.startsWith('dti_')){
-        ageTerm = 'Ams';
-    }
-
-    let npoly = 'npoly1';
-
-    const npoly2Metrics = [
-        'dti_fa',
-        'dki_md',
-        'dki_fa'
-    ];
-
-    if(npoly2Metrics.includes(metric)){
-        npoly = 'npoly2';
-    }
-
-    let protocol = 'P0';
-
-    if(metric === 'dki_ak'){
-        protocol = 'Pm';
-    }
-
-    return `gamlss_${roiName}_${metricName}_${ageTerm}_S0_${protocol}_Cms_SHASH_fp_${npoly}.json`;
-}
-//////////////////////////////////////////////////////////
-// LOAD CURVE
-//////////////////////////////////////////////////////////
-
-async function loadCurve(metric, roi, gender='F'){
-
-    const filename = buildJsonFilename(metric, roi);
-
-    console.log('Loading:', filename);
-
-    const response = await fetch(`curves/${filename}`);
-
-    if(!response.ok){
-
-        throw new Error(
-            `Arquivo não encontrado:\n${filename}`
-        );
-    }
-
-    const json = await response.json();
-
-    return json.data[gender];
+function buildJsonFilename(metric, roi) {
+  const metricName = metricMap[metric];
+  let ageTerm = 'Am';
+  if (metric.startsWith('dti_')) ageTerm = 'Ams';
+  let npoly = 'npoly1';
+  if (['dti_fa','dki_md','dki_fa'].includes(metric)) npoly = 'npoly2';
+  let protocol = 'P0';
+  if (metric === 'dki_ak') protocol = 'Pm';
+  return `gamlss_${roi}_${metricName}_${ageTerm}_S0_${protocol}_Cms_SHASH_fp_${npoly}.json`;
 }
 
-async function populateROIs(){
+async function loadCurve(metric, roi, gender = 'F') {
+  const filename = buildJsonFilename(metric, roi);
+  const response = await fetch(`curves/${filename}`);
+  if (!response.ok) throw new Error(`File not found:\n${filename}`);
+  const json = await response.json();
+  return json.data[gender];
+}
 
-    const response =
-        await fetch("available_rois.json");
+//////////////////////////////////////////////////////////
+// UI: GENDER
+//////////////////////////////////////////////////////////
 
-    const rois = await response.json();
+function setGender(val) {
+  selectedGender = val;
+  document.querySelectorAll('.gender-pill').forEach(p => {
+    p.className = 'gender-pill';
+    if (p.dataset.val === val) p.classList.add(`active-${val}`);
+  });
+}
 
-    const select =
-        document.getElementById("rois");
+//////////////////////////////////////////////////////////
+// UI: HEMISPHERE
+//////////////////////////////////////////////////////////
 
-    select.innerHTML = "";
+function setHemi(val) {
+  selectedHemi = val;
+  document.querySelectorAll('.hemi-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.val === val);
+  });
+  updatePreview();
+}
 
-    rois.forEach(roi => {
+//////////////////////////////////////////////////////////
+// UI: SOURCE / ROI CHANGE
+//////////////////////////////////////////////////////////
 
-        const option =
-            document.createElement("option");
+function onSourceChange() {
+  populateRoiNames();
+  onRoiNameChange();
+}
 
-        option.value = roi;
+function populateRoiNames() {
+  const source = document.getElementById('roi-source').value;
+  const rois   = ROI_CATALOGUE[source] || [];
+  const sel    = document.getElementById('roi-name');
 
-        option.text = roi;
+  // Deduplicate by key (tractseg CC_2 appears twice due to copy-paste in catalogue)
+  const seen = new Set();
+  sel.innerHTML = '';
+  rois.forEach(r => {
+    const uid = r.key;
+    if (seen.has(uid)) return;
+    seen.add(uid);
+    const opt = document.createElement('option');
+    opt.value = r.key;
+    opt.text  = r.label;
+    opt.dataset.bilateral = r.bilateral ? '1' : '0';
+    sel.appendChild(opt);
+  });
 
-        select.appendChild(option);
+  updateHemiPills();
+  updatePreview();
+}
+
+function onRoiNameChange() {
+  updateHemiPills();
+  updatePreview();
+}
+
+function getCurrentRoiEntry() {
+  const source = document.getElementById('roi-source').value;
+  const key    = document.getElementById('roi-name').value;
+  return (ROI_CATALOGUE[source] || []).find(r => r.key === key);
+}
+
+function updateHemiPills() {
+  const entry = getCurrentRoiEntry();
+  const bilateral = entry ? entry.bilateral : false;
+  const pills = document.querySelectorAll('.hemi-pill');
+
+  if (!bilateral) {
+    pills.forEach(p => {
+      p.disabled = true;
+      p.classList.remove('active');
     });
+    selectedHemi = 'none';
+  } else {
+    pills.forEach(p => { p.disabled = false; });
+    // default to Left if coming from non-bilateral
+    if (selectedHemi === 'none') {
+      selectedHemi = 'L';
+    }
+    document.querySelectorAll('.hemi-pill').forEach(p => {
+      p.classList.toggle('active', p.dataset.val === selectedHemi);
+    });
+  }
+
+  updatePreview();
+}
+
+function updatePreview() {
+  const source  = document.getElementById('roi-source').value;
+  const entry   = getCurrentRoiEntry();
+  if (!entry) return;
+
+  const rois = getRoiStrings(source, entry.key, selectedHemi, entry.bilateral);
+  const preview = document.getElementById('roi-preview');
+  preview.innerHTML = rois.map(r =>
+    `<span class="key">${r || '—'}</span>`
+  ).join('<br>');
+}
+
+//////////////////////////////////////////////////////////
+// STATUS BAR
+//////////////////////////////////////////////////////////
+
+function setStatus(msg, type = '') {
+  const bar  = document.getElementById('status-bar');
+  const text = document.getElementById('status-text');
+  bar.className = type ? `error ok loading`.split(' ').includes(type) ? '' : '' : '';
+  bar.classList.remove('error','ok','loading');
+  if (type) bar.classList.add(type);
+  text.textContent = msg;
 }
 
 //////////////////////////////////////////////////////////
 // PLOT
 //////////////////////////////////////////////////////////
 
-async function plotSelectedCurve(){
+async function plotSelectedCurve() {
+  const metric = document.getElementById('metricas').value;
+  const source = document.getElementById('roi-source').value;
+  const entry  = getCurrentRoiEntry();
 
-    const metric =
-        document.getElementById('metricas').value;
+  if (!entry) { setStatus('No ROI selected.', 'error'); return; }
 
-    const roi =
-        document.getElementById('rois').value;
+  const roiStrings = getRoiStrings(source, entry.key, selectedHemi, entry.bilateral);
 
-    const gender =
-        document.getElementById('gender').value;
+  setStatus(`Loading ${roiStrings.length} curve(s)…`, 'loading');
 
-    try{
+  const hue   = (curveCount * 57) % 360;
+  const color = `hsl(${hue},70%,55%)`;
+  curveCount++;
 
-        const curve =
-            await loadCurve(metric, roi, gender);
+  const newTraces = [];
+  let loadedAll = true;
 
-        const x = curve.grid;
+  for (const roi of roiStrings) {
+    const hemiLabel = roi.includes('_L_') || roi.includes('_left_') ? ' L'
+                    : roi.includes('_R_') || roi.includes('_right_') ? ' R'
+                    : '';
+    const prefix = `${metric.toUpperCase()} | ${entry.label}${hemiLabel} | ${selectedGender}`;
 
-        ////////////////////////////////////////////////////
-        // UNIQUE COLOR
-        ////////////////////////////////////////////////////
+    try {
+      const curve = await loadCurve(metric, roi, selectedGender);
+      const x = curve.grid;
 
-        const hue = (curveCount * 57) % 360;
-
-        const color =
-            `hsl(${hue},70%,45%)`;
-
-        curveCount++;
-
-        ////////////////////////////////////////////////////
-        // PREFIX
-        ////////////////////////////////////////////////////
-
-        const prefix =
-            `${metric.toUpperCase()} | ${roi} | ${gender}`;
-
-        ////////////////////////////////////////////////////
-        // TRACES
-        ////////////////////////////////////////////////////
-
-        const traces = [
-
-            {
-                x:x,
-                y:curve.P3,
-                mode:'lines',
-                name:`${prefix} P3`,
-                line:{
-                    dash:'dot',
-                    color:color,
-                    width:1
-                },
-                opacity:0.35
-            },
-
-            {
-                x:x,
-                y:curve.P15,
-                mode:'lines',
-                name:`${prefix} P15`,
-                line:{
-                    color:color,
-                    width:1
-                },
-                opacity:0.5
-            },
-
-            {
-                x:x,
-                y:curve.P50,
-                mode:'lines',
-                name:`${prefix} P50`,
-                line:{
-                    color:color,
-                    width:4
-                }
-            },
-
-            {
-                x:x,
-                y:curve.P85,
-                mode:'lines',
-                name:`${prefix} P85`,
-                line:{
-                    color:color,
-                    width:1
-                },
-                opacity:0.5
-            },
-
-            {
-                x:x,
-                y:curve.P97,
-                mode:'lines',
-                name:`${prefix} P97`,
-                line:{
-                    dash:'dot',
-                    color:color,
-                    width:1
-                },
-                opacity:0.35
-            }
-
-        ];
-
-        ////////////////////////////////////////////////////
-        // APPEND
-        ////////////////////////////////////////////////////
-
-        allTraces.push(...traces);
-
-        ////////////////////////////////////////////////////
-        // LAYOUT
-        ////////////////////////////////////////////////////
-
-        const layout = {
-
-            title: {
-
-                text:'Normative Curves',
-                font:{size:22}
-            },
-
-            xaxis: {
-
-                title:'Age (years)',
-                gridcolor:'#e5e5e5'
-            },
-
-            yaxis: {
-
-                title:'Metric value',
-                gridcolor:'#e5e5e5'
-            },
-
-            hovermode:'x unified',
-
-            template:'plotly_white',
-
-            legend:{
-                orientation:'h',
-                y:-0.2
-            }
-
-        };
-
-        ////////////////////////////////////////////////////
-        // REACT
-        ////////////////////////////////////////////////////
-
-        Plotly.react(
-            'graph',
-            allTraces,
-            layout,
-            {responsive:true}
-        );
-
+      newTraces.push(
+        { x, y: curve.P3,  mode:'lines', name:`${prefix} P3`,  line:{ dash:'dot', color, width:1  }, opacity:0.3 },
+        { x, y: curve.P15, mode:'lines', name:`${prefix} P15`, line:{ color, width:1 },              opacity:0.55 },
+        { x, y: curve.P50, mode:'lines', name:`${prefix} P50`, line:{ color, width:3 } },
+        { x, y: curve.P85, mode:'lines', name:`${prefix} P85`, line:{ color, width:1 },              opacity:0.55 },
+        { x, y: curve.P97, mode:'lines', name:`${prefix} P97`, line:{ dash:'dot', color, width:1  }, opacity:0.3 },
+      );
+    } catch (e) {
+      setStatus(`Error: ${e.message}`, 'error');
+      loadedAll = false;
     }
-    catch(err){
+  }
 
-        console.error(err);
+  if (newTraces.length === 0) return;
 
-        alert(err.message);
-    }
+  // Register in plotted list
+  const id = `curve-${Date.now()}`;
+  const shortLabel = `${metric.toUpperCase()} · ${entry.label} · ${selectedGender}`;
+  plotted.push({ id, color, traces: newTraces, label: shortLabel });
+  allTraces.push(...newTraces);
+
+  renderCurveList();
+  renderPlot();
+
+  if (loadedAll) setStatus(`Plotted: ${shortLabel}`, 'ok');
+}
+
+//////////////////////////////////////////////////////////
+// RENDER PLOT
+//////////////////////////////////////////////////////////
+
+function renderPlot() {
+  const layout = {
+    paper_bgcolor: '#161b22',
+    plot_bgcolor:  '#161b22',
+    font:   { family: 'IBM Plex Sans, sans-serif', color: '#e6edf3', size: 12 },
+    title:  { text: 'Normative Centile Curves', font: { size: 18 }, x: 0.05 },
+    xaxis:  { title: 'Age (years)', gridcolor: '#30363d', zerolinecolor: '#30363d', color:'#7d8590' },
+    yaxis:  { title: 'Metric value', gridcolor: '#30363d', zerolinecolor: '#30363d', color:'#7d8590' },
+    hovermode: 'x unified',
+    legend: { orientation: 'h', y: -0.18, font: { size: 10 }, bgcolor: 'rgba(0,0,0,0)' },
+    margin: { t: 50, b: 60, l: 60, r: 20 },
+  };
+
+  Plotly.react('graph', allTraces, layout, { responsive: true });
+}
+
+//////////////////////////////////////////////////////////
+// CURVE LIST
+//////////////////////////////////////////////////////////
+
+function renderCurveList() {
+  const list = document.getElementById('curve-list');
+  const none = document.getElementById('no-curves');
+
+  if (plotted.length === 0) {
+    list.innerHTML = '';
+    list.appendChild(none);
+    none.style.display = '';
+    return;
+  }
+
+  none.style.display = 'none';
+  list.innerHTML = '';
+
+  plotted.forEach(p => {
+    const tag = document.createElement('div');
+    tag.className = 'curve-tag';
+    tag.id = `tag-${p.id}`;
+    tag.innerHTML = `
+      <span class="curve-dot" style="background:${p.color}"></span>
+      <span class="curve-tag-text" title="${p.label}">${p.label}</span>
+      <button class="curve-remove" onclick="removeCurve('${p.id}')" title="Remove">×</button>
+    `;
+    list.appendChild(tag);
+  });
+}
+
+function removeCurve(id) {
+  const entry = plotted.find(p => p.id === id);
+  if (!entry) return;
+
+  // Remove its traces from allTraces
+  const traceSet = new Set(entry.traces);
+  allTraces = allTraces.filter(t => !traceSet.has(t));
+  plotted   = plotted.filter(p => p.id !== id);
+
+  renderCurveList();
+  renderPlot();
+  setStatus('Curve removed.', '');
 }
 
 //////////////////////////////////////////////////////////
 // CLEAR
 //////////////////////////////////////////////////////////
 
-function clearPlot(){
-
-    allTraces = [];
-
-    curveCount = 0;
-
-    Plotly.react(
-        'graph',
-        [],
-        {},
-        {responsive:true}
-    );
+function clearPlot() {
+  allTraces = [];
+  plotted   = [];
+  curveCount = 0;
+  renderCurveList();
+  Plotly.react('graph', [], {
+    paper_bgcolor: '#161b22',
+    plot_bgcolor:  '#161b22',
+  }, { responsive: true });
+  setStatus('Plot cleared.', '');
 }
 
 //////////////////////////////////////////////////////////
-// AUTO LOAD
+// INIT
 //////////////////////////////////////////////////////////
 
-populateROIs();
-
-plotSelectedCurve();
+populateRoiNames();
+setStatus('Ready. Select a metric and ROI, then click Plot.', '');
 
 </script>
-
 </body>
 </html>
