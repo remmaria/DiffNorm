@@ -28,7 +28,8 @@ body {
   font-family: 'IBM Plex Sans', sans-serif;
   background: var(--bg);
   color: var(--text);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -41,7 +42,7 @@ header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   padding: 0 24px;
-  height: 64px;
+  height: 52px;
   gap: 16px;
   position: sticky;
   top: 0;
@@ -69,13 +70,14 @@ header {
   letter-spacing: 0.05em;
 }
 
-.logo-left, .logo-right { height: 38px; flex-shrink: 0; }
+.logo-left, .logo-right { height: 30px; flex-shrink: 0; }
 
 /* ── LAYOUT ─────────────────────────────────────────── */
 .layout {
   display: flex;
   flex: 1;
   overflow: visible;
+  height: calc(100vh - 52px);
 }
 
 /* ── SIDEBAR ─────────────────────────────────────────── */
@@ -86,9 +88,15 @@ header {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+
+  overflow-x: visible;
   overflow-y: auto;
-  padding: 20px 16px 24px;
-  gap: 20px;
+
+  padding: 10px 12px 12px;
+  gap: 10px;
+
+  position: relative;
+  z-index: 20;
 }
 .sidebar {
   position: relative;
@@ -102,7 +110,7 @@ header {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 /* ── FIELD GROUPS ────────────────────────────────────── */
@@ -288,14 +296,14 @@ select optgroup { background: #161b22; font-weight: 600; }
 #curve-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .curve-tag {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 8px;
+  padding: 4px 6px;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -399,8 +407,8 @@ select optgroup { background: #161b22; font-weight: 600; }
   display: flex;
   flex-direction: column;
   overflow: visible;
-  padding: 16px;
-  gap: 12px;
+  padding: 10px;
+  gap: 8px;
 }
 
 #graph {
@@ -498,7 +506,7 @@ select optgroup { background: #161b22; font-weight: 600; }
       </div>
     </div>
 
-    <hr class="divider">
+    <hr class="divider compact">
 
     <!-- METRIC -->
     <div class="field-group">
@@ -526,7 +534,7 @@ select optgroup { background: #161b22; font-weight: 600; }
       </div>
     </div>
 
-    <hr class="divider">
+    <hr class="divider compact">
 
     <!-- MACRO GROUP FILTER -->
     <div class="field-group">
@@ -544,7 +552,7 @@ select optgroup { background: #161b22; font-weight: 600; }
       </div>
     </div>
 
-    <hr class="divider">
+    <hr class="divider compact">
 
     <!-- ROI SOURCE -->
     <div class="field-group">
@@ -580,7 +588,7 @@ select optgroup { background: #161b22; font-weight: 600; }
     <!-- ROI PREVIEW -->
     <div id="roi-preview">—</div>
 
-    <hr class="divider">
+    <hr class="divider compact">
 
     <!-- ACTIONS -->
     <div class="btn-row">
@@ -592,7 +600,7 @@ select optgroup { background: #161b22; font-weight: 600; }
       </button>
     </div>
 
-    <hr class="divider">
+    <hr class="divider compact">
 
     <!-- CURVE LIST -->
     <div class="field-group">
@@ -602,7 +610,7 @@ select optgroup { background: #161b22; font-weight: 600; }
       </div>
     </div>
 
-    <hr class="divider">
+    <hr class="divider compact">
 
     <!-- CURVE MODE -->
     <div class="field-group">
